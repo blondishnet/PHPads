@@ -1,0 +1,7 @@
+user=admin
+pass=ads
+click_url=/ads/click.php
+js_url=/ads/js.php
+target=_blank
+border=1
+next_autoindex=1
