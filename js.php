@@ -1,5 +1,5 @@
 <?php
-require '/home/yourdomain/public_html/ads/ads.php';
+require './ads.php';
 ///////////////////////////////////////
 // Don't Edit Anything Below This Line!
 ///////////////////////////////////////
