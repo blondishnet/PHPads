@@ -3,7 +3,7 @@ require './ads.php';
 ///////////////////////////////////////
 // Don't Edit Anything Below This Line!
 ///////////////////////////////////////
-if (!isset($_GET['id']) || !ereg('^[0-9]+$', $_GET['id'])) {
+if (!isset($_GET['id']) || !ereg('^[A-Za-z0-9]+$', $_GET['id'])) {
     $_GET['id'] = null;
 }
 if (!isset($_GET['width']) || !ereg('^[0-9]+$', $_GET['width'])) {
