@@ -71,6 +71,7 @@ class bannerAds
 		}
                 $data[5]++;
                 $ads[$theone] = join('||', $data);
+		$neligible = array();
                 for ($j = 0; $j < count($eligible); $j++) {
                     if ($eligible[$j] != $theone) {
                         $neligible[] = $eligible[$j];
