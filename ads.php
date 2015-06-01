@@ -14,14 +14,14 @@ class bannerAds
             for ($i = 0; $i < count($ads); $i++) {
                 if(ereg("^$id\|\|", $ads[$i])) {
                     $data = explode('||', $ads[$i]);
-		    if ($data[4] > 0) {
+		    if ($data[4] > 0 || $data[4] == -1) {
                         $this->ad[] = "<a href=\"" .$bannerAds['click_url']. "?id=$data[0]\" target=\"" .$bannerAds['target']. "\"><img src=\"$data[10]\" alt=\"$data[11]\" width=\"$data[7]\" height=\"$data[8]\" border=\"" .$bannerAds['border']. "\" /></a>";
-                        $data[4]--;
+			if ($data[4] > 0) { // Don't turn 0 impressions left into infinite impressions
+                            $data[4]--;
+			}
 			$data[5]++;
 			$ads[$i] = join('||', $data);
                     }
-//                    $data[5]++;
-//                    $ads[$i] = join('||', $data);
                     break;
                 }
             }
@@ -51,7 +51,7 @@ class bannerAds
                 $found++;
             }
             if ($found < $max) {
-                die();
+                return;
             }
             srand((double) microtime() * 1000000);
             shuffle($eligible);
@@ -65,12 +65,12 @@ class bannerAds
                 }
                 $theone = $eligible[$theone];
                 $data = explode('||', $ads[$theone]);
-		if ($data[4] > 0) {
-                    $this->ad[] .= "<a href=\"" .$bannerAds['click_url']. "?id=$data[0]\" target=\"" .$bannerAds['target']. "\"><img src=\"$data[10]\" alt=\"$data[11]\" width=\"$data[7]\" height=\"$data[8]\" border=\"" .$bannerAds['border']. "\" /></a>";
+                $this->ad[] .= "<a href=\"" .$bannerAds['click_url']. "?id=$data[0]\" target=\"" .$bannerAds['target']. "\"><img src=\"$data[10]\" alt=\"$data[11]\" width=\"$data[7]\" height=\"$data[8]\" border=\"" .$bannerAds['border']. "\" /></a>";
+                if ($data[4] > 0) { // Remaining impressions check already taken care of in previous for loop
                     $data[4]--;
-                    $data[5]++;
-                    $ads[$theone] = join('||', $data);
 		}
+                $data[5]++;
+                $ads[$theone] = join('||', $data);
                 for ($j = 0; $j < count($eligible); $j++) {
                     if ($eligible[$j] != $theone) {
                         $neligible[] = $eligible[$j];
