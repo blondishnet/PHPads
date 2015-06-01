@@ -123,6 +123,7 @@ function config()
         $bannerAds['js_url'] = trim($_POST['js_url']);
         $bannerAds['target'] = trim($_POST['target']);
         $bannerAds['border'] = $_POST['border'];
+	$bannerAds['default_display'] = trim($_POST['default_display']);
         writeads();
         menu();
     } else if (isset($_POST['cancel'])) {
@@ -138,7 +139,10 @@ function config()
             }
             echo "<option value=\"$i\"$s>$i</option>";
         }
-        echo '</select><br /><br /><input type="submit" name="save" value="Save" /> <input type="submit" name="cancel" value="Cancel" />';
+        echo '</select>';
+//	echo '<br /><br /><input type="submit" name="save" value="Save" /> <input type="submit" name="cancel" value="Cancel" />';
+	echo '<hr width="550" /><li><b>Default content to display</b></li><br /><br>This is what is displayed if no Ads in the system match the requested settings (can be used to display adverts from Google Ads or another Ad partner if all options are expired). <br><br>Default content: <textarea name="default_display" wrap="virtual" cols="65" rows="6">' .$bannerAds['default_display']. '</textarea>';
+	echo '<br /><br /><input type="submit" name="save" value="Save" /> <input type="submit" name="cancel" value="Cancel" />';
         foot();
     }
 }
