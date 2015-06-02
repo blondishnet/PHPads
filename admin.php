@@ -220,6 +220,7 @@ function edit()
         if (!isset($_POST['confirm_delete']) || $_POST['confirm_delete'] != 1) {
             die('You did not confirm the delete. <a href="javascript:window.history.go(-1);">[Back]</a>');
         }
+	$nads = array();
         foreach ($ads as $ad) {
             if(!ereg('^' .$_POST['id']. '\|\|', $ad)) {
                 $nads[] = $ad;
