@@ -323,14 +323,14 @@ global $bannerAds;
             for ($i = 1; $i <= $_POST['numtypes']; $i++) {
                 if ($_POST["adID_$i"] != '') {
                     echo "\n/* Code to display ad ID " .$_POST["adID_$i"]. " */\n";
-                    echo "&lt;?php \$buttons$i = new digiAds (" .$_POST["adID_$i"]. "); ?&gt;\n";
+                    echo "&lt;?php \$buttons$i = new bannerAds ('" .$_POST["adID_$i"]. "'); ?&gt;\n";
                     echo "&lt;?php echo \$buttons" .$i. "->ad[0]; ?&gt;\n";
                 } else {
                     echo "\n/* Code to display " .$_POST["numads_$i"]. " ad(s)";
                     if (($_POST["width_$i"] != '') && ($_POST["height_$i"] != '')) {
                         echo " with width of " .$_POST["width_$i"]. " and height of " .$_POST["height_$i"];
                     }
-                    echo " */\n&lt;?php \$buttons$i = new digiAds (null, " .$_POST["numads_$i"];
+                    echo " */\n&lt;?php \$buttons$i = new bannerAds (null, " .$_POST["numads_$i"];
                     if (($_POST["width_$i"] != '') && ($_POST["height_$i"] != '')) {
                         echo ", " .$_POST["width_$i"]. ", " .$_POST["height_$i"];
                     }
