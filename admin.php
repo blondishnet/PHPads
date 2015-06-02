@@ -30,6 +30,9 @@ switch ($_REQUEST['action']) {
     case 'codegen':
         codegen();
         break;
+    case 'fileupload':
+	fileupload();
+	break;
     case 'logout':
         logout();
         break;
@@ -82,7 +85,7 @@ function head($title)
 }
 function foot()
 {
-    echo '</td></tr></table><br /><br /><div align="center"><hr width="550"><span class="smalltext"><a href="admin.php?action=config">Configuration</a> | <a href="admin.php?action=list">List Ads</a> | <a href="admin.php?action=add">Add Ad</a> | <a href="admin.php?action=codegen">Code Generator</a> | <a href="admin.php?action=logout">Logout</a><p><a href="http://blondish.net/">PHPads</a></span></div></body></html>';
+    echo '</td></tr></table><br /><br /><div align="center"><hr width="550"><span class="smalltext"><a href="admin.php?action=config">Configuration</a> | <a href="admin.php?action=list">List Ads</a> | <a href="admin.php?action=add">Add Ad</a> | <a href="admin.php?action=fileupload">File upload</a> | <a href="admin.php?action=codegen">Code Generator</a> | <a href="admin.php?action=logout">Logout</a><p><a href="http://blondish.net/">PHPads</a></span></div></body></html>';
 }
 function auth()
 {
@@ -107,7 +110,7 @@ function login($msg = '')
 function menu()
 {
     head('Admin Menu');
-    echo '<br><br><center><a href="admin.php?action=config">Setup</a><br><a href="admin.php?action=list">Edit Ads/ Ad Stats</a><br><a href="admin.php?action=add">Add Ad</a><br><a href="admin.php?action=codegen">Code Generator</a><br><a href="admin.php?action=logout">Logout</a></center>';
+    echo '<br><br><center><a href="admin.php?action=config">Setup</a><br><a href="admin.php?action=list">Edit Ads/ Ad Stats</a><br><a href="admin.php?action=add">Add Ad</a><br><a href="admin.php?action=fileupload">Upload file</a><br /><a href="admin.php?action=codegen">Code Generator</a><br><a href="admin.php?action=logout">Logout</a></center>';
     foot();
     exit;
 }
@@ -364,6 +367,51 @@ global $bannerAds;
         foot();
     }
 }
+function fileupload()
+{
+    if (isset($_POST['submit'])) {
+	head('File upload...');
+	$target_dir = "uploads/";
+	$target_file = $target_dir . basename($_FILES["fileToUpload"]["name"]);
+	$uploadOk = 1;
+	$imageFileType = pathinfo($target_file,PATHINFO_EXTENSION);
+
+	// Allow image uploads
+        $check = getimagesize($_FILES["fileToUpload"]["tmp_name"]);
+	if($check !== false) {
+	    $uploadOk = 1;
+	} else {
+	    echo "File is not an image.<br />";
+	    $uploadOk = 0;
+	}
+	// Check if file already exists
+	if (file_exists($target_file)) {
+	    echo "Sorry, a file already exists with that name.<br />";
+	    $uploadOk = 0;
+	}
+	// Allow certain file formats
+	if($imageFileType != "jpg" && $imageFileType != "png" && $imageFileType != "jpeg" && $imageFileType != "gif" ) {
+	    echo "Sorry, only JPG, JPEG, PNG & GIF files are allowed.<br />";
+	    $uploadOk = 0;
+	}
+	if (!$uploadOk) {
+	    echo "Your file was not uploaded.";
+	// if everything is ok, try to upload file
+	} else {
+	    if (move_uploaded_file($_FILES["fileToUpload"]["tmp_name"], $target_file)) {
+	        echo "<strong>The file ". basename( $_FILES["fileToUpload"]["name"]). " has been uploaded.</strong><br /><br />The URL for this image is:<br />http://".$_SERVER['SERVER_NAME']."/uploads/". basename( $_FILES["fileToUpload"]["name"]);
+	    } else {
+	        echo "Sorry, there was an error uploading your file.";
+	    }
+	}
+	foot();
+    } else {
+        head('File upload');
+        echo '<form method="post" enctype="multipart/form-data">Select image to upload:<input type="file" name="fileToUpload" id="fileToUpload"><br /><input type="submit" value="Upload Image" name="submit"></form>';
+        foot();
+    }
+}
+
 function logout()
 {
     setcookie('user', '');
