@@ -153,7 +153,7 @@ function view()
 {
     global $ads;
     head('Ads');
-    echo '<center><table border="1" bordercolor="#000000" cellspacing="0" cellpadding="1"><tr><td nowrap="nowrap"><span class="smalltext"><b>Name (ID):</b></span></td><td><span class="smalltext"><b>Link URL:</b></span></td><td><span class="smalltext"><b>Image URL:</b></span></td><td><span class="smalltext"><b>Active:</b></span></td><td><span class="smalltext"><b>Weight:</b></span></td><td><span class="smalltext"><b>Ends:</b></span></td><td><span class="smalltext"><b>Left:</b></span></td><td><span class="smalltext"><b>Impressions:</b></span></td><td><span class="smalltext"><b>C/T:</b></span></td></tr>';
+    echo '<center><table border="1" bordercolor="#000000" cellspacing="0" cellpadding="1"><tr><td nowrap="nowrap"><span class="smalltext"><b>Name (ID):</b></span></td><td><span class="smalltext"><b>Link URL:</b></span></td><td><span class="smalltext"><b>Image URL:</b></span></td><td><span class="smalltext"><b>Active:</b></span></td><td><span class="smalltext"><b>Weight:</b></span></td><td><span class="smalltext"><b>Starts (m/d/y):</b></span></td><td><span class="smalltext"><b>Ends (m/d/y):</b></span></td><td><span class="smalltext"><b>Left:</b></span></td><td><span class="smalltext"><b>Impressions:</b></span></td><td><span class="smalltext"><b>C/T:</b></span></td></tr>';
     foreach ($ads as $ad) {
         $data = explode('||', $ad);
         $enabled = $data[1] ? 'Yes' : '<span class="error">No</span>';
@@ -162,6 +162,11 @@ function view()
         } else {
             $expires = date('m/d/y', $data[3]);
         }
+	if(!$data[12]) {
+            $starts = 'Always';
+	} else {
+	    $starts = date('m/d/y', $data[12]);
+	}
         if ($data[4] == -1) {
             $remaining = 'Unlimited';
         } else {
@@ -177,7 +182,7 @@ function view()
         } else {
             $imageUrl = $data[10];
         }
-        echo "<tr><td nowrap=\"nowrap\"><span class=\"smalltext\"><a href=\"admin.php?action=edit&id=$data[0]\" title=\"Edit Ad\">$data[11] ($data[0])</a></span></td><td nowrap=\"nowrap\"><span class=\"smalltext\"><a href=\"$data[9]\">$linkUrl</a></span></td><td nowrap=\"nowrap\"><span class=\"smalltext\"><a href=\"$data[10]\">$imageUrl</a></span></td><td><span class=\"smalltext\">$enabled</span></td><td><span class=\"smalltext\">$data[2]</span></td><td><span class=\"smalltext\">$expires</span></td><td><span class=\"smalltext\">$remaining</span></td><td><span class=\"smalltext\">$data[5]</span></td><td><span class=\"smalltext\">$data[6]</span></td></tr>";
+        echo "<tr><td nowrap=\"nowrap\"><span class=\"smalltext\"><a href=\"admin.php?action=edit&id=$data[0]\" title=\"Edit Ad\">$data[11] ($data[0])</a></span></td><td nowrap=\"nowrap\"><span class=\"smalltext\"><a href=\"$data[9]\">$linkUrl</a></span></td><td nowrap=\"nowrap\"><span class=\"smalltext\"><a href=\"$data[10]\">$imageUrl</a></span></td><td><span class=\"smalltext\">$enabled</span></td><td><span class=\"smalltext\">$data[2]</span></td><td><span class=\"smalltext\">$starts</span></td><td><span class=\"smalltext\">$expires</span></td><td><span class=\"smalltext\">$remaining</span></td><td><span class=\"smalltext\">$data[5]</span></td><td><span class=\"smalltext\">$data[6]</span></td></tr>";
     }
     echo '</table></center>';
     foot();
@@ -213,6 +218,7 @@ function edit()
                 $data[9] = $_POST['ad_link'];
                 $data[10] = $_POST['ad_image'];
                 $data[11] = $_POST['ad_name'];
+		$data[12] = mktime(0, 0, 0, (int)$_POST['ad_starts_month'], (int)$_POST['ad_starts_day'], (int)$_POST['ad_starts_year']); 
                 $ads[$i] = join('||', $data);
                 break;
             }
@@ -255,8 +261,10 @@ function edit()
         } else {
             $noexpires = '';
         }
+	$starts = dateselect('ad_starts', $data[12]);
+
         head('Edit Ad');
-        echo 'You can edit any of the following properties for Ad ID ' .$_GET['id']. ':<form method="post" action="admin.php"><input type="hidden" name="action" value="edit" /><input type="hidden" name="id" value="' .$_GET['id']. '" /><table width="550" border="1" cellspacing="0" cellpadding="1"><tr><td><b>Ad Name:</b></td><td><input type="text" name="ad_name" value="' .$data[11]. '" size="30" /></td></tr><tr><td><b>Is Enabled?</b></td><td><input type="checkbox" ' .$isen. ' name="ad_en" value="1" /> Ad is Enabled</td></tr><tr><td><b>Link URL:</b></td><td><input type="text" name="ad_link" value="' .$data[9]. '" size="30" /></td></tr><tr><td><b>Image URL:</b></td><td><input type="text" name="ad_image" value="' .$data[10]. '" size="30" /></td></tr><tr><td><b>Image Width:</b></td><td><input type="text" name="ad_width" value="' .$data[7]. '" size="4" /></td></tr><tr><td><b>Image Height:</b></td><td><input type="text" name="ad_height" value="' .$data[8]. '" size="4" /></td></tr><tr><td><b>Weight:</b></td><td><input type="text" name="ad_weight" value="' .$data[2]. '" size="4" /></td></tr><tr><td><b>Impressions:</b> ' .$data[5]. '&nbsp;<b>C/T:</b> ' .$data[6]. '</td><td><input type="checkbox" name="ad_reset" value="1" /> Reset to Zero</td></tr><tr><td><b>Impressions Remaining:</b><br /><span class="smalltext">Set to <b>-1</b> for unlimited</span></td><td><input type="text" name="ad_remain" value="' .$data[4]. '" size="4" /></td></tr><tr><td><b>Expires:</b></td><td>' .$expires. ' <input type="checkbox" name="ad_noexpires" ' .$noexpires. ' value="1" /> Never Expires</td></tr></table><br /><div align="center"><input type="submit" name="save" value="Save" /> <input type="submit" name="cancel" value="Cancel" /><br /><br /><input type="checkbox" name="confirm_delete" value="1" /> Check to Confirm Delete<br /><input type="submit" name="delete" value="Delete This Ad" /><br /><br /><br /><span class="smalltext">Ad Preview:</span><br /><a href="' .$data[9]. '" target="_blank"><img src="' .$data[10]. '" alt="' .$data[11]. '" width="' .$data[7]. '" height="' .$data[8]. '" border="0" /></a></div></form>';
+        echo 'You can edit any of the following properties for Ad ID ' .$_GET['id']. ':<form method="post" action="admin.php"><input type="hidden" name="action" value="edit" /><input type="hidden" name="id" value="' .$_GET['id']. '" /><table width="550" border="1" cellspacing="0" cellpadding="1"><tr><td><b>Ad Name:</b></td><td><input type="text" name="ad_name" value="' .$data[11]. '" size="30" /></td></tr><tr><td><b>Is Enabled?</b></td><td><input type="checkbox" ' .$isen. ' name="ad_en" value="1" /> Ad is Enabled</td></tr><tr><td><b>Link URL:</b></td><td><input type="text" name="ad_link" value="' .$data[9]. '" size="30" /></td></tr><tr><td><b>Image URL:</b></td><td><input type="text" name="ad_image" value="' .$data[10]. '" size="30" /></td></tr><tr><td><b>Image Width:</b></td><td><input type="text" name="ad_width" value="' .$data[7]. '" size="4" /></td></tr><tr><td><b>Image Height:</b></td><td><input type="text" name="ad_height" value="' .$data[8]. '" size="4" /></td></tr><tr><td><b>Weight:</b></td><td><input type="text" name="ad_weight" value="' .$data[2]. '" size="4" /></td></tr><tr><td><b>Impressions:</b> ' .$data[5]. '&nbsp;<b>C/T:</b> ' .$data[6]. '</td><td><input type="checkbox" name="ad_reset" value="1" /> Reset to Zero</td></tr><tr><td><b>Impressions Remaining:</b><br /><span class="smalltext">Set to <b>-1</b> for unlimited</span></td><td><input type="text" name="ad_remain" value="' .$data[4]. '" size="4" /></td></tr><tr><th>Starts</th><td>'.$starts.'</td></tr><tr><td><b>Expires:</b></td><td>' .$expires. ' <input type="checkbox" name="ad_noexpires" ' .$noexpires. ' value="1" /> Never Expires</td></tr></table><br /><div align="center"><input type="submit" name="save" value="Save" /> <input type="submit" name="cancel" value="Cancel" /><br /><br /><input type="checkbox" name="confirm_delete" value="1" /> Check to Confirm Delete<br /><input type="submit" name="delete" value="Delete This Ad" /><br /><br /><br /><span class="smalltext">Ad Preview:</span><br /><a href="' .$data[9]. '" target="_blank"><img src="' .$data[10]. '" alt="' .$data[11]. '" width="' .$data[7]. '" height="' .$data[8]. '" border="0" /></a></div></form>';
         foot();
     }
 }
@@ -290,6 +298,7 @@ function add()
         $data[9] = $_POST['ad_link'];
         $data[10] = $_POST['ad_image'];
         $data[11] = stripslashes($_POST['ad_name']);
+	$data[12] = mktime(0, 0, 0, (int)$_POST['ad_starts_month'], (int)$_POST['ad_starts_day'], (int)$_POST['ad_starts_year']);
         $ads[] = join('||', $data);
         writeads();
         menu();
@@ -297,8 +306,9 @@ function add()
         menu();
     } else {
         $expires = dateselect('ad_expires', '99999999');
+	$starts = dateselect('ad_starts', time());
         head('Add Ad');
-        echo '<form method="post" action="admin.php"><input type="hidden" name="action" value="add"><table width="550" border="1" cellspacing="0" cellpadding="1"><tr><td><b>Custom Ad ID:</b><br /><span class="smalltext">Letters and numbers only<br />Leave blank if no custom ID</span></td><td><input type="text" name="ad_custom_id" size="30" /></td></tr><tr><td><b>Ad Name:</b></td><td><input type="text" name="ad_name" value="New Ad" size="30" /></td></tr><tr><td><b>Is Enabled?</b></td><td><input type="checkbox" checked="checked" name="ad_en" value="1" /> Ad is Enabled</td></tr><tr><td><b>Link URL:</b></td><td><input type="text" name="ad_link" value="http://" size="30" /></td></tr><tr><td><b>Image URL:</b></td><td><input type="text" name="ad_image" value="http://" size="30" /></td></tr><tr><td><b>Image Width:</b></td><td><input type="text" name="ad_width" value="468" size="4" /></td></tr><tr><td><b>Image Height:</b></td><td><input type="text" name="ad_height" value="60" size="4" /></td></tr><tr><td><b>Weight:</b></td><td><input type="text" name="ad_weight" value="1" size="4" /></td></tr><tr><td><b>Impressions Remaining:</b><br/><span class="smalltext">Set to <b>-1</b> for unlimited</span></td><td><input type="text" name="ad_remain" value="-1" size="4" /></td></tr><tr><td><b>Expires:</b></td><td>' .$expires. ' <input type="checkbox" name="ad_noexpires" checked="checked" value="1" /> Never Expires</td></tr></table><br /><div align="center"><input type="submit" name="save" value="Save" /> <input type="submit" name="cancel" value="Cancel" /></div></form>';
+        echo '<form method="post" action="admin.php"><input type="hidden" name="action" value="add"><table width="550" border="1" cellspacing="0" cellpadding="1"><tr><td><b>Custom Ad ID:</b><br /><span class="smalltext">Letters and numbers only<br />Leave blank if no custom ID</span></td><td><input type="text" name="ad_custom_id" size="30" /></td></tr><tr><td><b>Ad Name:</b></td><td><input type="text" name="ad_name" value="New Ad" size="30" /></td></tr><tr><td><b>Is Enabled?</b></td><td><input type="checkbox" checked="checked" name="ad_en" value="1" /> Ad is Enabled</td></tr><tr><td><b>Link URL:</b></td><td><input type="text" name="ad_link" value="http://" size="30" /></td></tr><tr><td><b>Image URL:</b></td><td><input type="text" name="ad_image" value="http://" size="30" /></td></tr><tr><td><b>Image Width:</b></td><td><input type="text" name="ad_width" value="468" size="4" /></td></tr><tr><td><b>Image Height:</b></td><td><input type="text" name="ad_height" value="60" size="4" /></td></tr><tr><td><b>Weight:</b></td><td><input type="text" name="ad_weight" value="1" size="4" /></td></tr><tr><td><b>Impressions Remaining:</b><br/><span class="smalltext">Set to <b>-1</b> for unlimited</span></td><td><input type="text" name="ad_remain" value="-1" size="4" /></td></tr><tr><th>Starts</th><td>'.$starts.'</td></tr><tr><td><b>Expires:</b></td><td>' .$expires. ' <input type="checkbox" name="ad_noexpires" checked="checked" value="1" /> Never Expires</td></tr></table><br /><div align="center"><input type="submit" name="save" value="Save" /> <input type="submit" name="cancel" value="Cancel" /></div></form>';
         foot();
     }
 }
