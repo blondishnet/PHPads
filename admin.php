@@ -14,6 +14,7 @@ if ((@$_COOKIE['user'] != $bannerAds['user']) || (@$_COOKIE['pass'] != $bannerAd
     login();
     exit;
 }
+
 switch ($_REQUEST['action']) {
     case 'config':
         config();
@@ -127,6 +128,7 @@ function config()
         $bannerAds['target'] = trim($_POST['target']);
         $bannerAds['border'] = $_POST['border'];
 	$bannerAds['default_display'] = trim($_POST['default_display']);
+	$bannerAds['timezone'] = trim($_POST['timezone']);
         writeads();
         menu();
     } else if (isset($_POST['cancel'])) {
@@ -145,7 +147,13 @@ function config()
         echo '</select>';
 //	echo '<br /><br /><input type="submit" name="save" value="Save" /> <input type="submit" name="cancel" value="Cancel" />';
 	echo '<hr width="550" /><li><b>Default content to display</b></li><br /><br>This is what is displayed if no Ads in the system match the requested settings (can be used to display adverts from Google Ads or another Ad partner if all options are expired). <br><br>Default content: <textarea name="default_display" wrap="virtual" cols="65" rows="6">' .$bannerAds['default_display']. '</textarea>';
-	echo '<br /><br /><input type="submit" name="save" value="Save" /> <input type="submit" name="cancel" value="Cancel" />';
+	echo '<hr width="550" /><li><b>Timezone for start/end dates</b></li><br /><br>This controls which timezone the ad server is running in, to control exactly when adverts should start/stop being displayed.</br><br>Timezone: <select name="timezone">';
+	$timezones=timezone_identifiers_list();
+	for ($i = 0;  $i < count($timezones); $i++) {
+	    echo '<option value="' .$timezones[$i]. '"' .($bannerAds['timezone']==$timezones[$i]?' selected="selected"':''). '>' .$timezones[$i]. '</option>';
+	}
+	echo '</select>';
+	echo '<hr width="550" /><br /><br /><input type="submit" name="save" value="Save" /> <input type="submit" name="cancel" value="Cancel" />';
         foot();
     }
 }

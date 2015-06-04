@@ -14,6 +14,7 @@ foreach ($lines as $line) {
         }
     }
 }
+date_default_timezone_set($bannerAds['timezone']);
 function writeads()
 {
     global $bannerAdsPath, $ads, $bannerAds;

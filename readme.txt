@@ -318,7 +318,7 @@ readme.txt
 
 Requirements:
 
-at least PHP4
+at least PHP5.1
 
 
 Installation:
