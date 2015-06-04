@@ -21,7 +21,7 @@ function writeads()
     flock($data, 2) or die();
     fputs($data, @join("\n", $ads)."\n");
     while (list ($key, $val) = each ($bannerAds)) {
-        if (($key != '') && ($val != '')) {
+        if ($key != '') {
             fputs($data, $key.'='.$val."\n");
         }
     }
