@@ -6,7 +6,7 @@ $lines = file($bannerAdsPath) or die();
 foreach ($lines as $line) {
     $line = chop($line);
     if (($line != '') && (!ereg('^#', $line))) {
-        if (ereg('^[A-Za-z0-9]+\|\|', $line)) {
+        if (ereg('^[A-Za-z0-9 ]+\|\|', $line)) {
             $ads[] = $line;
         } else {
             list ($key, $val) = explode('=', $line);
