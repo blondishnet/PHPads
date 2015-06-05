@@ -165,7 +165,7 @@ function view()
     echo '<center><table border="1" bordercolor="#000000" cellspacing="0" cellpadding="1"><tr><td nowrap="nowrap"><span class="smalltext"><b>Name (ID):</b></span></td><td><span class="smalltext"><b>Link URL:</b></span></td><td><span class="smalltext"><b>Image URL:</b></span></td><td><span class="smalltext"><b>Active:</b></span></td><td><span class="smalltext"><b>Weight:</b></span></td><td><span class="smalltext"><b>Starts:</b></span></td><td><span class="smalltext"><b>Ends:</b></span></td><td><span class="smalltext"><b>Left:</b></span></td><td><span class="smalltext"><b>Impressions:</b></span></td><td><span class="smalltext"><b>C/T:</b></span></td></tr>';
     foreach ($ads as $ad) {
         $data = explode('||', $ad);
-        $enabled = $data[1] ? 'Yes' : '<span class="error">No</span>';
+        $enabled = $data[ PHPADS_ADELEMENT_ENABLED ] ? 'Yes' : '<span class="error">No</span>';
         if($data[3] == '99999999') {
             $expires = 'Never';
         } else {
@@ -191,7 +191,7 @@ function view()
         } else {
             $imageUrl = $data[10];
         }
-        echo "<tr><td nowrap=\"nowrap\"><span class=\"smalltext\"><a href=\"admin.php?action=edit&id=".$data[ PHPADS_ADELEMENT_ID ]."\" title=\"Edit Ad\">$data[11] (".$data[ PHPADS_ADELEMENT_ID ].")</a></span></td><td nowrap=\"nowrap\"><span class=\"smalltext\"><a href=\"$data[9]\">$linkUrl</a></span></td><td nowrap=\"nowrap\"><span class=\"smalltext\"><a href=\"$data[10]\">$imageUrl</a></span></td><td><span class=\"smalltext\">$enabled</span></td><td><span class=\"smalltext\">$data[2]</span></td><td><span class=\"smalltext\">$starts</span></td><td><span class=\"smalltext\">$expires</span></td><td><span class=\"smalltext\">$remaining</span></td><td><span class=\"smalltext\">$data[5]</span></td><td><span class=\"smalltext\">$data[6]</span></td></tr>";
+        echo "<tr><td nowrap=\"nowrap\"><span class=\"smalltext\"><a href=\"admin.php?action=edit&id=".urlencode($data[ PHPADS_ADELEMENT_ID ])."\" title=\"Edit Ad\">$data[11] (".$data[ PHPADS_ADELEMENT_ID ].")</a></span></td><td nowrap=\"nowrap\"><span class=\"smalltext\"><a href=\"$data[9]\">$linkUrl</a></span></td><td nowrap=\"nowrap\"><span class=\"smalltext\"><a href=\"$data[10]\">$imageUrl</a></span></td><td><span class=\"smalltext\">$enabled</span></td><td><span class=\"smalltext\">$data[2]</span></td><td><span class=\"smalltext\">$starts</span></td><td><span class=\"smalltext\">$expires</span></td><td><span class=\"smalltext\">$remaining</span></td><td><span class=\"smalltext\">$data[5]</span></td><td><span class=\"smalltext\">$data[6]</span></td></tr>";
     }
     echo '</table></center>';
     foot();
@@ -207,9 +207,9 @@ function edit()
             if(ereg('^' .$_POST['id']. '\|\|', $ads[$i])) {
                 $data = explode('||', $ads[$i]);
                 if (isset($_POST['ad_en']) && $_POST['ad_en'] == 1) {
-                    $data[1] = 1;
+                    $data[ PHPADS_ADELEMENT_ENABLED ] = 1;
                 } else {
-                    $data[1] = 0;
+                    $data[ PHPADS_ADELEMENT_ENABLED ] = 0;
                 }
                 if (isset($_POST['ad_reset']) && $_POST['ad_reset'] == 1) {
                     $data[5] = 0;
@@ -259,7 +259,7 @@ function edit()
         if (!isset($data)) {
             die('Ad ID ' .$_GET['id']. ' was not found');
         }
-        if ($data[1] == 1) {
+        if ($data[ PHPADS_ADELEMENT_ENABLED ] == 1) {
             $isen = 'checked="checked"';
         } else {
             $isen = '';
@@ -289,9 +289,9 @@ function add()
             $bannerAds['next_autoindex']++;
         }
         if (isset($_POST['ad_en']) && $_POST['ad_en'] == 1) {
-            $data[1] = 1;
+            $data[ PHPADS_ADELEMENT_ENABLED ] = 1;
         } else {
-            $data[1] = 0;
+            $data[ PHPADS_ADELEMENT_ENABLED ] = 0;
         }
         $data[2] = $_POST['ad_weight'];
         if (isset($_POST['ad_noexpires']) && $_POST['ad_noexpires'] == 1) {
