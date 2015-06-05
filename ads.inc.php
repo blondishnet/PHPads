@@ -3,6 +3,21 @@ $ads = array();
 $bannerAds = array();
 $bannerAdsTime = time();
 $lines = file($bannerAdsPath) or die();
+
+define( 'PHPADS_ADELEMENT_ID',		 0);
+define( 'PHPADS_ADELEMENT_ENABLED',	 1);
+define( 'PHPADS_ADELEMENT_WEIGHTING',	 2);
+define( 'PHPADS_ADELEMENT_ENDDATE',	 3);
+define( 'PHPADS_ADELEMENT_IMPRESSIONS',	 5);
+define( 'PHPADS_ADELEMENT_REMAINING',	 4);
+define( 'PHPADS_ADELEMENT_CLICKTHRUS',	 6);
+define( 'PHPADS_ADELEMENT_WIDTH',	 7);
+define( 'PHPADS_ADELEMENT_HEIGHT',	 8);
+define( 'PHPADS_ADELEMENT_LINK_URI',	 9);
+define( 'PHPADS_ADELEMENT_IMAGE_URI',	10);
+define( 'PHPADS_ADELEMENT_NAME',	11);
+define( 'PHPADS_ADELEMENT_STARTDATE',	12);
+
 foreach ($lines as $line) {
     $line = chop($line);
     if (($line != '') && (!ereg('^#', $line))) {

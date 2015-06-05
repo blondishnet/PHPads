@@ -7,15 +7,15 @@ require './ads.inc.php';
 for ($i = 0; $i < count($ads); $i++) {
     if(ereg('^' .$_GET['id']. '\|\|', $ads[$i])) {
         $data = explode('||', $ads[$i]);
-        $data[6]++;
+        $data[ PHPADS_ADELEMENT_CLICKTHRUS ]++;
         $ads[$i] = join('||', $data);
         break;
     }
 }
-if (!$data[9]) {
+if (!$data[PHPADS_ADELEMENT_LINK_URI]) {
     die();
 }
 writeads();
-Header("Location: $data[9]");
+Header("Location: ". $data[PHPADS_ADELEMENT_LINK_URI]);
 exit;
 ?>
