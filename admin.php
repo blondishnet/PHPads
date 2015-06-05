@@ -191,7 +191,7 @@ function view()
         } else {
             $imageUrl = $data[10];
         }
-        echo "<tr><td nowrap=\"nowrap\"><span class=\"smalltext\"><a href=\"admin.php?action=edit&id=$data[0]\" title=\"Edit Ad\">$data[11] ($data[0])</a></span></td><td nowrap=\"nowrap\"><span class=\"smalltext\"><a href=\"$data[9]\">$linkUrl</a></span></td><td nowrap=\"nowrap\"><span class=\"smalltext\"><a href=\"$data[10]\">$imageUrl</a></span></td><td><span class=\"smalltext\">$enabled</span></td><td><span class=\"smalltext\">$data[2]</span></td><td><span class=\"smalltext\">$starts</span></td><td><span class=\"smalltext\">$expires</span></td><td><span class=\"smalltext\">$remaining</span></td><td><span class=\"smalltext\">$data[5]</span></td><td><span class=\"smalltext\">$data[6]</span></td></tr>";
+        echo "<tr><td nowrap=\"nowrap\"><span class=\"smalltext\"><a href=\"admin.php?action=edit&id=$data[ PHPADS_ADELEMENT_ID ]\" title=\"Edit Ad\">$data[11] ($data[ PHPADS_ADELEMENT_ID ])</a></span></td><td nowrap=\"nowrap\"><span class=\"smalltext\"><a href=\"$data[9]\">$linkUrl</a></span></td><td nowrap=\"nowrap\"><span class=\"smalltext\"><a href=\"$data[10]\">$imageUrl</a></span></td><td><span class=\"smalltext\">$enabled</span></td><td><span class=\"smalltext\">$data[2]</span></td><td><span class=\"smalltext\">$starts</span></td><td><span class=\"smalltext\">$expires</span></td><td><span class=\"smalltext\">$remaining</span></td><td><span class=\"smalltext\">$data[5]</span></td><td><span class=\"smalltext\">$data[6]</span></td></tr>";
     }
     echo '</table></center>';
     foot();
@@ -283,9 +283,9 @@ function add()
     if (isset($_POST['save'])) {
         $data = array(11);
         if ($_POST['ad_custom_id'] != '') {
-            $data[0] = $_POST['ad_custom_id'];
+            $data[ PHPADS_ADELEMENT_ID ] = $_POST['ad_custom_id'];
         } else {
-            $data[0] = $bannerAds['next_autoindex'];
+            $data[ PHPADS_ADELEMENT_ID ] = $bannerAds['next_autoindex'];
             $bannerAds['next_autoindex']++;
         }
         if (isset($_POST['ad_en']) && $_POST['ad_en'] == 1) {
@@ -347,7 +347,7 @@ global $bannerAds;
                 if ($_POST["adID_$i"] != '') {
                     echo "\n/* Code to display ad ID " .$_POST["adID_$i"]. " */\n";
                     echo "&lt;?php \$buttons$i = new bannerAds ('" .$_POST["adID_$i"]. "'); ?&gt;\n";
-                    echo "&lt;?php echo \$buttons" .$i. "->ad[0]; ?&gt;\n";
+                    echo "&lt;?php echo \$buttons" .$i. "->ad[ PHPADS_ADELEMENT_ID ]; ?&gt;\n";
                 } else {
                     echo "\n/* Code to display " .$_POST["numads_$i"]. " ad(s)";
                     if (($_POST["width_$i"] != '') && ($_POST["height_$i"] != '')) {
