@@ -1,8 +1,10 @@
 <?php
 $ads = array();
+$adelements = array('id'=>0, 'enabled'=>1, 'weighting'=>2, 'expires'=>3, 'remaining'=>4, 'remaining'=>5, 'clickthrough'=>6, 'width'=>7, 'height'=>8, 'link'=>9, 'image'=>10, 'name'=>11, 'startdate'=>12 );
 $bannerAds = array();
 $bannerAdsTime = time();
 $lines = file($bannerAdsPath) or die();
+
 foreach ($lines as $line) {
     $line = chop($line);
     if (($line != '') && (!ereg('^#', $line))) {
