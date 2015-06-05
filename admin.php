@@ -166,10 +166,10 @@ function view()
     foreach ($ads as $ad) {
         $data = explode('||', $ad);
         $enabled = $data[ PHPADS_ADELEMENT_ENABLED ] ? 'Yes' : '<span class="error">No</span>';
-        if($data[3] == '99999999') {
+        if($data[ PHPADS_ADELEMENT_ENDDATE ] == '99999999') {
             $expires = 'Never';
         } else {
-            $expires = date($bannerAds['timeformat'], $data[3]);
+            $expires = date($bannerAds['timeformat'], $data[ PHPADS_ADELEMENT_ENDDATE ]);
         }
 	if(!$data[12]) {
             $starts = 'Always';
@@ -216,9 +216,9 @@ function edit()
                     $data[6] = 0;
                 }
                 if (isset($_POST['ad_noexpires']) && $_POST['ad_noexpires'] == 1) {
-                    $data[3] = '99999999';
+                    $data[ PHPADS_ADELEMENT_ENDDATE ] = '99999999';
                 } else {
-                    $data[3] = mktime(0, 0, 0, $_POST['ad_expires_month'], $_POST['ad_expires_day'], $_POST['ad_expires_year']);
+                    $data[ PHPADS_ADELEMENT_ENDDATE ] = mktime(0, 0, 0, $_POST['ad_expires_month'], $_POST['ad_expires_day'], $_POST['ad_expires_year']);
                 }
                 $data[ PHPADS_ADELEMENT_WEIGHTING ] = $_POST['ad_weight'];
                 $data[4] = $_POST['ad_remain'];
@@ -264,8 +264,8 @@ function edit()
         } else {
             $isen = '';
         }
-        $expires = dateselect('ad_expires', $data[3]);
-        if ($data[3] == '99999999') {
+        $expires = dateselect('ad_expires', $data[ PHPADS_ADELEMENT_ENDDATE ]);
+        if ($data[ PHPADS_ADELEMENT_ENDDATE ] == '99999999') {
             $noexpires = 'checked="checked"';
         } else {
             $noexpires = '';
@@ -295,9 +295,9 @@ function add()
         }
         $data[ PHPADS_ADELEMENT_WEIGHTING ] = $_POST['ad_weight'];
         if (isset($_POST['ad_noexpires']) && $_POST['ad_noexpires'] == 1) {
-            $data[3] = '99999999';
+            $data[ PHPADS_ADELEMENT_ENDDATE ] = '99999999';
         } else {
-            $data[3] = mktime(0, 0, 0, $_POST['ad_expires_month'], $_POST['ad_expires_day'], $_POST['ad_expires_year']);
+            $data[ PHPADS_ADELEMENT_ENDDATE ] = mktime(0, 0, 0, $_POST['ad_expires_month'], $_POST['ad_expires_day'], $_POST['ad_expires_year']);
         }
         $data[4] = $_POST['ad_remain'];
         $data[5] = 0;

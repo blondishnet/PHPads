@@ -15,7 +15,7 @@ class bannerAds
                 if(ereg("^$id\|\|", $ads[$i])) {
                     $data = explode('||', $ads[$i]);
 		    // Only return if we've still got some impressions left and we're within time
-		    if (($data[4] > 0 || $data[4] == -1) && ($data[3] > $bannerAdsTime && $data[12] < $bannerAdsTime) && $data[ PHPADS_ADELEMENT_ENABLED ]) {
+		    if (($data[4] > 0 || $data[4] == -1) && ($data[ PHPADS_ADELEMENT_ENDDATE ] > $bannerAdsTime && $data[12] < $bannerAdsTime) && $data[ PHPADS_ADELEMENT_ENABLED ]) {
                         $this->ad[] = "<a href=\"" .$bannerAds['click_url']. "?id=".urlencode($data[ PHPADS_ADELEMENT_ID ])."\" target=\"" .$bannerAds['target']. "\"><img src=\"$data[10]\" alt=\"$data[11]\" width=\"$data[7]\" height=\"$data[8]\" border=\"" .$bannerAds['border']. "\" /></a>";
 			if ($data[4] > 0) { // Don't turn 0 impressions left into infinite impressions
                             $data[4]--;
@@ -34,7 +34,7 @@ class bannerAds
                 if ($data[ PHPADS_ADELEMENT_ENABLED ] != 1) {
                     continue;
                 }
-                if (($data[3] != '99999999') && ($data[3] < $bannerAdsTime)) {
+                if (($data[ PHPADS_ADELEMENT_ENDDATE ] != '99999999') && ($data[ PHPADS_ADELEMENT_ENDDATE ] < $bannerAdsTime)) {
                     continue;
                 }
 		if ($data[12] && $data[12] > $bannerAdsTime) {

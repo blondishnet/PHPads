@@ -7,7 +7,7 @@ $lines = file($bannerAdsPath) or die();
 define( 'PHPADS_ADELEMENT_ID',		 0);
 define( 'PHPADS_ADELEMENT_ENABLED',	 1);
 define( 'PHPADS_ADELEMENT_WEIGHTING',	 2);
-define( 'PHPADS_ADELEMENT_EXPIRES',	 3);
+define( 'PHPADS_ADELEMENT_ENDDATE',	 3);
 define( 'PHPADS_ADELEMENT_IMPRESSIONS',	 4);
 define( 'PHPADS_ADELEMENT_REMAINING',	 5);
 define( 'PHPADS_ADELEMENT_CLICKTHRUS',	 6);
