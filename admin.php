@@ -129,6 +129,7 @@ function config()
         $bannerAds['border'] = $_POST['border'];
 	$bannerAds['default_display'] = trim($_POST['default_display']);
 	$bannerAds['timezone'] = trim($_POST['timezone']);
+	$bannerAds['timeformat'] = trim($_POST['timeformat']);
         writeads();
         menu();
     } else if (isset($_POST['cancel'])) {
@@ -152,28 +153,28 @@ function config()
 	for ($i = 0;  $i < count($timezones); $i++) {
 	    echo '<option value="' .$timezones[$i]. '"' .($bannerAds['timezone']==$timezones[$i]?' selected="selected"':''). '>' .$timezones[$i]. '</option>';
 	}
-	echo '</select>';
+	echo '</select>><hr width="550" /><li><b>Time format</b></li><br><br>This controls only the display of times inputed - it has no functional effect beyond readability.<br><br>Time format: <input type="text" name="timeformat" value="' .$bannerAds['timeformat']. '" />';
 	echo '<hr width="550" /><br /><br /><input type="submit" name="save" value="Save" /> <input type="submit" name="cancel" value="Cancel" />';
         foot();
     }
 }
 function view()
 {
-    global $ads;
+    global $ads,$bannerAds;
     head('Ads');
-    echo '<center><table border="1" bordercolor="#000000" cellspacing="0" cellpadding="1"><tr><td nowrap="nowrap"><span class="smalltext"><b>Name (ID):</b></span></td><td><span class="smalltext"><b>Link URL:</b></span></td><td><span class="smalltext"><b>Image URL:</b></span></td><td><span class="smalltext"><b>Active:</b></span></td><td><span class="smalltext"><b>Weight:</b></span></td><td><span class="smalltext"><b>Starts (m/d/y):</b></span></td><td><span class="smalltext"><b>Ends (m/d/y):</b></span></td><td><span class="smalltext"><b>Left:</b></span></td><td><span class="smalltext"><b>Impressions:</b></span></td><td><span class="smalltext"><b>C/T:</b></span></td></tr>';
+    echo '<center><table border="1" bordercolor="#000000" cellspacing="0" cellpadding="1"><tr><td nowrap="nowrap"><span class="smalltext"><b>Name (ID):</b></span></td><td><span class="smalltext"><b>Link URL:</b></span></td><td><span class="smalltext"><b>Image URL:</b></span></td><td><span class="smalltext"><b>Active:</b></span></td><td><span class="smalltext"><b>Weight:</b></span></td><td><span class="smalltext"><b>Starts:</b></span></td><td><span class="smalltext"><b>Ends:</b></span></td><td><span class="smalltext"><b>Left:</b></span></td><td><span class="smalltext"><b>Impressions:</b></span></td><td><span class="smalltext"><b>C/T:</b></span></td></tr>';
     foreach ($ads as $ad) {
         $data = explode('||', $ad);
         $enabled = $data[1] ? 'Yes' : '<span class="error">No</span>';
         if($data[3] == '99999999') {
             $expires = 'Never';
         } else {
-            $expires = date('m/d/y', $data[3]);
+            $expires = date($bannerAds['timeformat'], $data[3]);
         }
 	if(!$data[12]) {
             $starts = 'Always';
 	} else {
-	    $starts = date('m/d/y', $data[12]);
+	    $starts = date($bannerAds['timeformat'], $data[12]);
 	}
         if ($data[4] == -1) {
             $remaining = 'Unlimited';
