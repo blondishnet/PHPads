@@ -15,10 +15,10 @@ class bannerAds
                 if(ereg("^$id\|\|", $ads[$i])) {
                     $data = explode('||', $ads[$i]);
 		    // Only return if we've still got some impressions left and we're within time
-		    if (($data[4] > 0 || $data[4] == -1) && ($data[ PHPADS_ADELEMENT_ENDDATE ] > $bannerAdsTime && $data[12] < $bannerAdsTime) && $data[ PHPADS_ADELEMENT_ENABLED ]) {
+		    if (($data[ PHPADS_ADELEMENT_REMAINING ] > 0 || $data[ PHPADS_ADELEMENT_REMAINING ] == -1) && ($data[ PHPADS_ADELEMENT_ENDDATE ] > $bannerAdsTime && $data[12] < $bannerAdsTime) && $data[ PHPADS_ADELEMENT_ENABLED ]) {
                         $this->ad[] = "<a href=\"" .$bannerAds['click_url']. "?id=".urlencode($data[ PHPADS_ADELEMENT_ID ])."\" target=\"" .$bannerAds['target']. "\"><img src=\"$data[10]\" alt=\"$data[11]\" width=\"$data[7]\" height=\"$data[8]\" border=\"" .$bannerAds['border']. "\" /></a>";
-			if ($data[4] > 0) { // Don't turn 0 impressions left into infinite impressions
-                            $data[4]--;
+			if ($data[ PHPADS_ADELEMENT_REMAINING ] > 0) { // Don't turn 0 impressions left into infinite impressions
+                            $data[ PHPADS_ADELEMENT_REMAINING ]--;
 			}
 			$data[5]++;
 			$ads[$i] = join('||', $data);
@@ -40,7 +40,7 @@ class bannerAds
 		if ($data[12] && $data[12] > $bannerAdsTime) {
 		    continue;
 		}
-                if ($data[4] == 0) {
+                if ($data[ PHPADS_ADELEMENT_REMAINING ] == 0) {
                     continue;
                 }
                 if (($width != 0) && ($data[7] != $width)) {
@@ -70,8 +70,8 @@ class bannerAds
                 $theone = $eligible[$theone];
                 $data = explode('||', $ads[$theone]);
                 $this->ad[] .= "<a href=\"" .$bannerAds['click_url']. "?id=".urlencode($data[ PHPADS_ADELEMENT_ID ])."\" target=\"" .$bannerAds['target']. "\"><img src=\"$data[10]\" alt=\"$data[11]\" width=\"$data[7]\" height=\"$data[8]\" border=\"" .$bannerAds['border']. "\" /></a>";
-                if ($data[4] > 0) { // Remaining impressions check already taken care of in previous for loop
-                    $data[4]--;
+                if ($data[ PHPADS_ADELEMENT_REMAINING ] > 0) { // Remaining impressions check already taken care of in previous for loop
+                    $data[ PHPADS_ADELEMENT_REMAINING ]--;
 		}
                 $data[5]++;
                 $ads[$theone] = join('||', $data);
