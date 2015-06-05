@@ -20,7 +20,7 @@ class bannerAds
 			if ($data[ PHPADS_ADELEMENT_REMAINING ] > 0) { // Don't turn 0 impressions left into infinite impressions
                             $data[ PHPADS_ADELEMENT_REMAINING ]--;
 			}
-			$data[5]++;
+			$data[ PHPADS_ADELEMENT_IMPRESSIONS ]++;
 			$ads[$i] = join('||', $data);
                     }
                     break;
@@ -73,7 +73,7 @@ class bannerAds
                 if ($data[ PHPADS_ADELEMENT_REMAINING ] > 0) { // Remaining impressions check already taken care of in previous for loop
                     $data[ PHPADS_ADELEMENT_REMAINING ]--;
 		}
-                $data[5]++;
+                $data[ PHPADS_ADELEMENT_IMPRESSIONS ]++;
                 $ads[$theone] = join('||', $data);
 		$neligible = array();
                 for ($j = 0; $j < count($eligible); $j++) {
