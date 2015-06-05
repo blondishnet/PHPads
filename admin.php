@@ -171,10 +171,10 @@ function view()
         } else {
             $expires = date($bannerAds['timeformat'], $data[ PHPADS_ADELEMENT_ENDDATE ]);
         }
-	if(!$data[12]) {
+	if(!$data[ PHPADS_ADELEMENT_STARTDATE ]) {
             $starts = 'Always';
 	} else {
-	    $starts = date($bannerAds['timeformat'], $data[12]);
+	    $starts = date($bannerAds['timeformat'], $data[ PHPADS_ADELEMENT_STARTDATE ]);
 	}
         if ($data[ PHPADS_ADELEMENT_REMAINING ] == -1) {
             $remaining = 'Unlimited';
@@ -191,7 +191,7 @@ function view()
         } else {
             $imageUrl = $data[ PHPADS_ADELEMENT_IMAGE_URI ];
         }
-        echo "<tr><td nowrap=\"nowrap\"><span class=\"smalltext\"><a href=\"admin.php?action=edit&id=".urlencode($data[ PHPADS_ADELEMENT_ID ])."\" title=\"Edit Ad\">$data[ PHPADS_ADELEMENT_NAME ] (".$data[ PHPADS_ADELEMENT_ID ].")</a></span></td><td nowrap=\"nowrap\"><span class=\"smalltext\"><a href=\"$data[ PHPADS_ADELEMENT_LINK_URI ]\">$linkUrl</a></span></td><td nowrap=\"nowrap\"><span class=\"smalltext\"><a href=\"$data[ PHPADS_ADELEMENT_IMAGE_URI ]\">$imageUrl</a></span></td><td><span class=\"smalltext\">$enabled</span></td><td><span class=\"smalltext\">$data[ PHPADS_ADELEMENT_WEIGHTING ]</span></td><td><span class=\"smalltext\">$starts</span></td><td><span class=\"smalltext\">$expires</span></td><td><span class=\"smalltext\">$remaining</span></td><td><span class=\"smalltext\">$data[ PHPADS_ADELEMENT_IMPRESSIONS ]</span></td><td><span class=\"smalltext\">$data[ PHPADS_ADELEMENT_CLICKTHRUS ]</span></td></tr>";
+        echo "<tr><td nowrap=\"nowrap\"><span class=\"smalltext\"><a href=\"admin.php?action=edit&id=".urlencode($data[ PHPADS_ADELEMENT_ID ])."\" title=\"Edit Ad\">" .$data[ PHPADS_ADELEMENT_NAME ]. " (".$data[ PHPADS_ADELEMENT_ID ].")</a></span></td><td nowrap=\"nowrap\"><span class=\"smalltext\"><a href=\"" .$data[ PHPADS_ADELEMENT_LINK_URI ]. "\">$linkUrl</a></span></td><td nowrap=\"nowrap\"><span class=\"smalltext\"><a href=\"" .$data[ PHPADS_ADELEMENT_IMAGE_URI ]. "\">$imageUrl</a></span></td><td><span class=\"smalltext\">$enabled</span></td><td><span class=\"smalltext\">" .$data[ PHPADS_ADELEMENT_WEIGHTING ]. "</span></td><td><span class=\"smalltext\">$starts</span></td><td><span class=\"smalltext\">$expires</span></td><td><span class=\"smalltext\">$remaining</span></td><td><span class=\"smalltext\">" .$data[ PHPADS_ADELEMENT_IMPRESSIONS ]. "</span></td><td><span class=\"smalltext\">" .$data[ PHPADS_ADELEMENT_CLICKTHRUS ]. "</span></td></tr>";
     }
     echo '</table></center>';
     foot();
@@ -227,7 +227,7 @@ function edit()
                 $data[ PHPADS_ADELEMENT_LINK_URI ] = $_POST['ad_link'];
                 $data[ PHPADS_ADELEMENT_IMAGE_URI ] = $_POST['ad_image'];
                 $data[ PHPADS_ADELEMENT_NAME ] = $_POST['ad_name'];
-		$data[12] = mktime(0, 0, 0, (int)$_POST['ad_starts_month'], (int)$_POST['ad_starts_day'], (int)$_POST['ad_starts_year']); 
+		$data[ PHPADS_ADELEMENT_STARTDATE ] = mktime(0, 0, 0, (int)$_POST['ad_starts_month'], (int)$_POST['ad_starts_day'], (int)$_POST['ad_starts_year']); 
                 $ads[$i] = join('||', $data);
                 break;
             }
@@ -270,7 +270,7 @@ function edit()
         } else {
             $noexpires = '';
         }
-	$starts = dateselect('ad_starts', $data[12]);
+	$starts = dateselect('ad_starts', $data[ PHPADS_ADELEMENT_STARTDATE ]);
 
         head('Edit Ad');
         echo 'You can edit any of the following properties for Ad ID ' .$_GET['id']. ':<form method="post" action="admin.php"><input type="hidden" name="action" value="edit" /><input type="hidden" name="id" value="' .$_GET['id']. '" /><table width="550" border="1" cellspacing="0" cellpadding="1"><tr><td><b>Ad Name:</b></td><td><input type="text" name="ad_name" value="' .$data[ PHPADS_ADELEMENT_NAME ]. '" size="30" /></td></tr><tr><td><b>Is Enabled?</b></td><td><input type="checkbox" ' .$isen. ' name="ad_en" value="1" /> Ad is Enabled</td></tr><tr><td><b>Link URL:</b></td><td><input type="text" name="ad_link" value="' .$data[ PHPADS_ADELEMENT_LINK_URI ]. '" size="30" /></td></tr><tr><td><b>Image URL:</b></td><td><input type="text" name="ad_image" value="' .$data[ PHPADS_ADELEMENT_IMAGE_URI ]. '" size="30" /></td></tr><tr><td><b>Image Width:</b></td><td><input type="text" name="ad_width" value="' .$data[ PHPADS_ADELEMENT_WIDTH ]. '" size="4" /></td></tr><tr><td><b>Image Height:</b></td><td><input type="text" name="ad_height" value="' .$data[ PHPADS_ADELEMENT_HEIGHT ]. '" size="4" /></td></tr><tr><td><b>Weight:</b></td><td><input type="text" name="ad_weight" value="' .$data[ PHPADS_ADELEMENT_WEIGHTING ]. '" size="4" /></td></tr><tr><td><b>Impressions:</b> ' .$data[ PHPADS_ADELEMENT_IMPRESSIONS ]. '&nbsp;<b>C/T:</b> ' .$data[ PHPADS_ADELEMENT_CLICKTHRUS ]. '</td><td><input type="checkbox" name="ad_reset" value="1" /> Reset to Zero</td></tr><tr><td><b>Impressions Remaining:</b><br /><span class="smalltext">Set to <b>-1</b> for unlimited</span></td><td><input type="text" name="ad_remain" value="' .$data[ PHPADS_ADELEMENT_REMAINING ]. '" size="4" /></td></tr><tr><th>Starts</th><td>'.$starts.'</td></tr><tr><td><b>Expires:</b></td><td>' .$expires. ' <input type="checkbox" name="ad_noexpires" ' .$noexpires. ' value="1" /> Never Expires</td></tr></table><br /><div align="center"><input type="submit" name="save" value="Save" /> <input type="submit" name="cancel" value="Cancel" /><br /><br /><input type="checkbox" name="confirm_delete" value="1" /> Check to Confirm Delete<br /><input type="submit" name="delete" value="Delete This Ad" /><br /><br /><br /><span class="smalltext">Ad Preview:</span><br /><a href="' .$data[ PHPADS_ADELEMENT_LINK_URI ]. '" target="_blank"><img src="' .$data[ PHPADS_ADELEMENT_IMAGE_URI ]. '" alt="' .$data[ PHPADS_ADELEMENT_NAME ]. '" width="' .$data[ PHPADS_ADELEMENT_WIDTH ]. '" height="' .$data[ PHPADS_ADELEMENT_HEIGHT ]. '" border="0" /></a></div></form>';
@@ -307,7 +307,7 @@ function add()
         $data[ PHPADS_ADELEMENT_LINK_URI ] = $_POST['ad_link'];
         $data[ PHPADS_ADELEMENT_IMAGE_URI ] = $_POST['ad_image'];
         $data[ PHPADS_ADELEMENT_NAME ] = stripslashes($_POST['ad_name']);
-	$data[12] = mktime(0, 0, 0, (int)$_POST['ad_starts_month'], (int)$_POST['ad_starts_day'], (int)$_POST['ad_starts_year']);
+	$data[ PHPADS_ADELEMENT_STARTDATE ] = mktime(0, 0, 0, (int)$_POST['ad_starts_month'], (int)$_POST['ad_starts_day'], (int)$_POST['ad_starts_year']);
         $ads[] = join('||', $data);
         writeads();
         menu();
