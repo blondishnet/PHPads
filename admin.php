@@ -191,7 +191,7 @@ function view()
         } else {
             $imageUrl = $data[10];
         }
-        echo "<tr><td nowrap=\"nowrap\"><span class=\"smalltext\"><a href=\"admin.php?action=edit&id=$data[ PHPADS_ADELEMENT_ID ]\" title=\"Edit Ad\">$data[11] ($data[ PHPADS_ADELEMENT_ID ])</a></span></td><td nowrap=\"nowrap\"><span class=\"smalltext\"><a href=\"$data[9]\">$linkUrl</a></span></td><td nowrap=\"nowrap\"><span class=\"smalltext\"><a href=\"$data[10]\">$imageUrl</a></span></td><td><span class=\"smalltext\">$enabled</span></td><td><span class=\"smalltext\">$data[2]</span></td><td><span class=\"smalltext\">$starts</span></td><td><span class=\"smalltext\">$expires</span></td><td><span class=\"smalltext\">$remaining</span></td><td><span class=\"smalltext\">$data[5]</span></td><td><span class=\"smalltext\">$data[6]</span></td></tr>";
+        echo "<tr><td nowrap=\"nowrap\"><span class=\"smalltext\"><a href=\"admin.php?action=edit&id=".$data[ PHPADS_ADELEMENT_ID ]."\" title=\"Edit Ad\">$data[11] (".$data[ PHPADS_ADELEMENT_ID ].")</a></span></td><td nowrap=\"nowrap\"><span class=\"smalltext\"><a href=\"$data[9]\">$linkUrl</a></span></td><td nowrap=\"nowrap\"><span class=\"smalltext\"><a href=\"$data[10]\">$imageUrl</a></span></td><td><span class=\"smalltext\">$enabled</span></td><td><span class=\"smalltext\">$data[2]</span></td><td><span class=\"smalltext\">$starts</span></td><td><span class=\"smalltext\">$expires</span></td><td><span class=\"smalltext\">$remaining</span></td><td><span class=\"smalltext\">$data[5]</span></td><td><span class=\"smalltext\">$data[6]</span></td></tr>";
     }
     echo '</table></center>';
     foot();
