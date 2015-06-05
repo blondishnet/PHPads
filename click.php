@@ -12,10 +12,10 @@ for ($i = 0; $i < count($ads); $i++) {
         break;
     }
 }
-if (!$data[9]) {
+if (!$data[PHPADS_ADELEMENT_LINK_URI]) {
     die();
 }
 writeads();
-Header("Location: $data[9]");
+Header("Location: ". $data[PHPADS_ADELEMENT_LINK_URI]);
 exit;
 ?>
