@@ -81,12 +81,12 @@ function dateselect($name, $date)
 }
 function head($title)
 {
-    echo '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" /><title>PHPads - admin - ' .$title. '</title><style type="text/css">body, td{font-family:arial;font-size:10px;color:#000000;background-color:#D8E7D3;}b{font-weight:bold;}h1{font-size:12px;}.smalltext{font-size:10px;}.error{color:#ff0000;}</style></head><body><div align="center"><img src="phpads-main.png" alt="PHPads">
+    echo '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" /><title>PHPads - admin - ' .$title. '</title><link href="jquery-ui-1.11.4.custom/jquery-ui.css" rel="stylesheet"><style type="text/css">body, td{font-family:arial;font-size:10px;color:#000000;background-color:#D8E7D3;}b{font-weight:bold;}h1{font-size:12px;}.smalltext{font-size:10px;}.error{color:#ff0000;}</style></head><body><div align="center"><img src="phpads-main.png" alt="PHPads">
 <br><b>' .$title. '</b></div><br /><br /><table align="center" width="550" border="0" cellspacing="2" cellpadding="2"><tr><td align="left">';
 }
 function foot()
 {
-    echo '</td></tr></table><br /><br /><div align="center"><hr width="550"><span class="smalltext"><a href="admin.php?action=config">Configuration</a> | <a href="admin.php?action=list">List Ads</a> | <a href="admin.php?action=add">Add Ad</a> | <a href="admin.php?action=fileupload">File upload</a> | <a href="admin.php?action=codegen">Code Generator</a> | <a href="admin.php?action=logout">Logout</a><p><a href="http://blondish.net/">PHPads</a></span></div></body></html>';
+    echo '</td></tr></table><br /><br /><div align="center"><hr width="550"><span class="smalltext"><a href="admin.php?action=config">Configuration</a> | <a href="admin.php?action=list">List Ads</a> | <a href="admin.php?action=add">Add Ad</a> | <a href="admin.php?action=fileupload">File upload</a> | <a href="admin.php?action=codegen">Code Generator</a> | <a href="admin.php?action=logout">Logout</a><p><a href="http://blondish.net/">PHPads</a></span></div><script src="jquery-ui-1.11.4.custom/external/jquery/jquery.js"></script><script src="jquery-ui-1.11.4.custom/jquery-ui.js"></script></body></html>';
 }
 function auth()
 {
