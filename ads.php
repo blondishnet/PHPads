@@ -16,7 +16,7 @@ class bannerAds
                     $data = explode('||', $ads[$i]);
 		    // Only return if we've still got some impressions left and we're within time
 		    if (($data[ PHPADS_ADELEMENT_REMAINING ] > 0 || $data[ PHPADS_ADELEMENT_REMAINING ] == -1) && ($data[ PHPADS_ADELEMENT_ENDDATE ] > $bannerAdsTime && $data[12] < $bannerAdsTime) && $data[ PHPADS_ADELEMENT_ENABLED ]) {
-                        $this->ad[] = "<a href=\"" .$bannerAds['click_url']. "?id=".urlencode($data[ PHPADS_ADELEMENT_ID ])."\" target=\"" .$bannerAds['target']. "\"><img src=\"$data[10]\" alt=\"$data[11]\" width=\"" .$data[ PHPADS_ADELEMENT_WIDTH ]. "\" height=\"$data[8]\" border=\"" .$bannerAds['border']. "\" /></a>";
+                        $this->ad[] = "<a href=\"" .$bannerAds['click_url']. "?id=".urlencode($data[ PHPADS_ADELEMENT_ID ])."\" target=\"" .$bannerAds['target']. "\"><img src=\"$data[10]\" alt=\"$data[11]\" width=\"" .$data[ PHPADS_ADELEMENT_WIDTH ]. "\" height=\"" .$data[ PHPADS_ADELEMENT_HEIGHT ]. "\" border=\"" .$bannerAds['border']. "\" /></a>";
 			if ($data[ PHPADS_ADELEMENT_REMAINING ] > 0) { // Don't turn 0 impressions left into infinite impressions
                             $data[ PHPADS_ADELEMENT_REMAINING ]--;
 			}
@@ -46,7 +46,7 @@ class bannerAds
                 if (($width != 0) && ($data[ PHPADS_ADELEMENT_WIDTH ] != $width)) {
                     continue;
                 }
-                if (($height != 0) && ($data[8] != $height)) {
+                if (($height != 0) && ($data[ PHPADS_ADELEMENT_HEIGHT ] != $height)) {
                     continue;
                 }
                 for ($j = 0; $j < $data[ PHPADS_ADELEMENT_WEIGHTING ]; $j++) {
@@ -69,7 +69,7 @@ class bannerAds
                 }
                 $theone = $eligible[$theone];
                 $data = explode('||', $ads[$theone]);
-                $this->ad[] .= "<a href=\"" .$bannerAds['click_url']. "?id=".urlencode($data[ PHPADS_ADELEMENT_ID ])."\" target=\"" .$bannerAds['target']. "\"><img src=\"$data[10]\" alt=\"$data[11]\" width=\"" .$data[ PHPADS_ADELEMENT_WIDTH ]. "\" height=\"$data[8]\" border=\"" .$bannerAds['border']. "\" /></a>";
+                $this->ad[] .= "<a href=\"" .$bannerAds['click_url']. "?id=".urlencode($data[ PHPADS_ADELEMENT_ID ])."\" target=\"" .$bannerAds['target']. "\"><img src=\"$data[10]\" alt=\"$data[11]\" width=\"" .$data[ PHPADS_ADELEMENT_WIDTH ]. "\" height=\"" .$data[ PHPADS_ADELEMENT_HEIGHT ]. "\" border=\"" .$bannerAds['border']. "\" /></a>";
                 if ($data[ PHPADS_ADELEMENT_REMAINING ] > 0) { // Remaining impressions check already taken care of in previous for loop
                     $data[ PHPADS_ADELEMENT_REMAINING ]--;
 		}
