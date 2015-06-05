@@ -49,7 +49,7 @@ class bannerAds
                 if (($height != 0) && ($data[8] != $height)) {
                     continue;
                 }
-                for ($j = 0; $j < $data[2]; $j++) {
+                for ($j = 0; $j < $data[ PHPADS_ADELEMENT_WEIGHTING ]; $j++) {
                         $eligible[] = $i;
                 }
                 $found++;
