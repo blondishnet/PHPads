@@ -18,6 +18,9 @@ define( 'PHPADS_ADELEMENT_IMAGE_URI',	10);
 define( 'PHPADS_ADELEMENT_NAME',	11);
 define( 'PHPADS_ADELEMENT_STARTDATE',	12);
 
+define( 'PHPADS_ADTYPE_IMAGE',           0);
+define( 'PHPADS_ADTYPE_OTHER',           1);
+
 foreach ($lines as $line) {
     $line = chop($line);
     if (($line != '') && (!ereg('^#', $line))) {
