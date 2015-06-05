@@ -7,7 +7,7 @@ require './ads.inc.php';
 for ($i = 0; $i < count($ads); $i++) {
     if(ereg('^' .$_GET['id']. '\|\|', $ads[$i])) {
         $data = explode('||', $ads[$i]);
-        $data[6]++;
+        $data[ PHPADS_ADELEMENT_CLICKTHRUS ]++;
         $ads[$i] = join('||', $data);
         break;
     }
