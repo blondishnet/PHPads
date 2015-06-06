@@ -14,12 +14,15 @@ class bannerAds
             for ($i = 0; $i < count($ads); $i++) {
                 if(ereg("^$id\|\|", $ads[$i])) {
                     $data = explode('||', $ads[$i]);
-                    $this->ad[] = "<a href=\"" .$bannerAds['click_url']. "?id=$data[0]\" target=\"" .$bannerAds['target']. "\"><img src=\"$data[10]\" alt=\"$data[11]\" width=\"$data[7]\" height=\"$data[8]\" border=\"" .$bannerAds['border']. "\" /></a>";
-                    if ($data[4] > 0) {
-                        $data[4]--;
+		    // Only return if we've still got some impressions left and we're within time
+		    if (($data[ PHPADS_ADELEMENT_REMAINING ] > 0 || $data[ PHPADS_ADELEMENT_REMAINING ] == -1) && ($data[ PHPADS_ADELEMENT_ENDDATE ] > $bannerAdsTime && $data[ PHPADS_ADELEMENT_STARTDATE ] < $bannerAdsTime) && $data[ PHPADS_ADELEMENT_ENABLED ]) {
+                        $this->ad[] = "<a href=\"" .$bannerAds['click_url']. "?id=".urlencode($data[ PHPADS_ADELEMENT_ID ])."\" target=\"" .$bannerAds['target']. "\"><img src=\"" .$data[ PHPADS_ADELEMENT_IMAGE_URI ]. "\" alt=\"" .$data[ PHPADS_ADELEMENT_NAME ]. "\" width=\"" .$data[ PHPADS_ADELEMENT_WIDTH ]. "\" height=\"" .$data[ PHPADS_ADELEMENT_HEIGHT ]. "\" border=\"" .$bannerAds['border']. "\" /></a>";
+			if ($data[ PHPADS_ADELEMENT_REMAINING ] > 0) { // Don't turn 0 impressions left into infinite impressions
+                            $data[ PHPADS_ADELEMENT_REMAINING ]--;
+			}
+			$data[ PHPADS_ADELEMENT_IMPRESSIONS ]++;
+			$ads[$i] = join('||', $data);
                     }
-                    $data[5]++;
-                    $ads[$i] = join('||', $data);
                     break;
                 }
             }
@@ -28,28 +31,31 @@ class bannerAds
             $found = 0;
             for ($i = 0; $i < count($ads); $i++) {
                 $data = explode('||', $ads[$i]);
-                if ($data[1] != 1) {
+                if ($data[ PHPADS_ADELEMENT_ENABLED ] != 1) {
                     continue;
                 }
-                if (($data[3] != '99999999') && ($data[3] < $bannerAdsTime)) {
+                if (($data[ PHPADS_ADELEMENT_ENDDATE ] != '99999999') && ($data[ PHPADS_ADELEMENT_ENDDATE ] < $bannerAdsTime)) {
                     continue;
                 }
-                if ($data[4] == 0) {
+		if ($data[ PHPADS_ADELEMENT_STARTDATE ] && $data[ PHPADS_ADELEMENT_STARTDATE ] > $bannerAdsTime) {
+		    continue;
+		}
+                if ($data[ PHPADS_ADELEMENT_REMAINING ] == 0) {
                     continue;
                 }
-                if (($width != 0) && ($data[7] != $width)) {
+                if (($width != 0) && ($data[ PHPADS_ADELEMENT_WIDTH ] != $width)) {
                     continue;
                 }
-                if (($height != 0) && ($data[8] != $height)) {
+                if (($height != 0) && ($data[ PHPADS_ADELEMENT_HEIGHT ] != $height)) {
                     continue;
                 }
-                for ($j = 0; $j < $data[2]; $j++) {
+                for ($j = 0; $j < $data[ PHPADS_ADELEMENT_WEIGHTING ]; $j++) {
                         $eligible[] = $i;
                 }
                 $found++;
             }
             if ($found < $max) {
-                die();
+                return;
             }
             srand((double) microtime() * 1000000);
             shuffle($eligible);
@@ -63,12 +69,13 @@ class bannerAds
                 }
                 $theone = $eligible[$theone];
                 $data = explode('||', $ads[$theone]);
-                $this->ad[] .= "<a href=\"" .$bannerAds['click_url']. "?id=$data[0]\" target=\"" .$bannerAds['target']. "\"><img src=\"$data[10]\" alt=\"$data[11]\" width=\"$data[7]\" height=\"$data[8]\" border=\"" .$bannerAds['border']. "\" /></a>";
-                if ($data[4] > 0) {
-                    $data[4]--;
-                }
-                $data[5]++;
+                $this->ad[] .= "<a href=\"" .$bannerAds['click_url']. "?id=".urlencode($data[ PHPADS_ADELEMENT_ID ])."\" target=\"" .$bannerAds['target']. "\"><img src=\"" .$data[ PHPADS_ADELEMENT_IMAGE_URI ]. "\" alt=\"" .$data[ PHPADS_ADELEMENT_NAME ]. "\" width=\"" .$data[ PHPADS_ADELEMENT_WIDTH ]. "\" height=\"" .$data[ PHPADS_ADELEMENT_HEIGHT ]. "\" border=\"" .$bannerAds['border']. "\" /></a>";
+                if ($data[ PHPADS_ADELEMENT_REMAINING ] > 0) { // Remaining impressions check already taken care of in previous for loop
+                    $data[ PHPADS_ADELEMENT_REMAINING ]--;
+		}
+                $data[ PHPADS_ADELEMENT_IMPRESSIONS ]++;
                 $ads[$theone] = join('||', $data);
+		$neligible = array();
                 for ($j = 0; $j < count($eligible); $j++) {
                     if ($eligible[$j] != $theone) {
                         $neligible[] = $eligible[$j];

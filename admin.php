@@ -14,6 +14,7 @@ if ((@$_COOKIE['user'] != $bannerAds['user']) || (@$_COOKIE['pass'] != $bannerAd
     login();
     exit;
 }
+
 switch ($_REQUEST['action']) {
     case 'config':
         config();
@@ -30,6 +31,9 @@ switch ($_REQUEST['action']) {
     case 'codegen':
         codegen();
         break;
+    case 'fileupload':
+	fileupload();
+	break;
     case 'logout':
         logout();
         break;
@@ -82,7 +86,7 @@ function head($title)
 }
 function foot()
 {
-    echo '</td></tr></table><br /><br /><div align="center"><hr width="550"><span class="smalltext"><a href="admin.php?action=config">Configuration</a> | <a href="admin.php?action=list">List Ads</a> | <a href="admin.php?action=add">Add Ad</a> | <a href="admin.php?action=codegen">Code Generator</a> | <a href="admin.php?action=logout">Logout</a><p><a href="http://blondish.net/">PHPads</a></span></div></body></html>';
+    echo '</td></tr></table><br /><br /><div align="center"><hr width="550"><span class="smalltext"><a href="admin.php?action=config">Configuration</a> | <a href="admin.php?action=list">List Ads</a> | <a href="admin.php?action=add">Add Ad</a> | <a href="admin.php?action=fileupload">File upload</a> | <a href="admin.php?action=codegen">Code Generator</a> | <a href="admin.php?action=logout">Logout</a><p><a href="http://blondish.net/">PHPads</a></span></div></body></html>';
 }
 function auth()
 {
@@ -107,7 +111,7 @@ function login($msg = '')
 function menu()
 {
     head('Admin Menu');
-    echo '<br><br><center><a href="admin.php?action=config">Setup</a><br><a href="admin.php?action=list">Edit Ads/ Ad Stats</a><br><a href="admin.php?action=add">Add Ad</a><br><a href="admin.php?action=codegen">Code Generator</a><br><a href="admin.php?action=logout">Logout</a></center>';
+    echo '<br><br><center><a href="admin.php?action=config">Setup</a><br><a href="admin.php?action=list">Edit Ads/ Ad Stats</a><br><a href="admin.php?action=add">Add Ad</a><br><a href="admin.php?action=fileupload">Upload file</a><br /><a href="admin.php?action=codegen">Code Generator</a><br><a href="admin.php?action=logout">Logout</a></center>';
     foot();
     exit;
 }
@@ -123,6 +127,9 @@ function config()
         $bannerAds['js_url'] = trim($_POST['js_url']);
         $bannerAds['target'] = trim($_POST['target']);
         $bannerAds['border'] = $_POST['border'];
+	$bannerAds['default_display'] = trim($_POST['default_display']);
+	$bannerAds['timezone'] = trim($_POST['timezone']);
+	$bannerAds['timeformat'] = trim($_POST['timeformat']);
         writeads();
         menu();
     } else if (isset($_POST['cancel'])) {
@@ -138,39 +145,53 @@ function config()
             }
             echo "<option value=\"$i\"$s>$i</option>";
         }
-        echo '</select><br /><br /><input type="submit" name="save" value="Save" /> <input type="submit" name="cancel" value="Cancel" />';
+        echo '</select>';
+//	echo '<br /><br /><input type="submit" name="save" value="Save" /> <input type="submit" name="cancel" value="Cancel" />';
+	echo '<hr width="550" /><li><b>Default content to display</b></li><br /><br>This is what is displayed if no Ads in the system match the requested settings (can be used to display adverts from Google Ads or another Ad partner if all options are expired). <br><br>Default content: <textarea name="default_display" wrap="virtual" cols="65" rows="6">' .$bannerAds['default_display']. '</textarea>';
+	echo '<hr width="550" /><li><b>Timezone for start/end dates</b></li><br /><br>This controls which timezone the ad server is running in, to control exactly when adverts should start/stop being displayed.</br><br>Timezone: <select name="timezone">';
+	$timezones=timezone_identifiers_list();
+	for ($i = 0;  $i < count($timezones); $i++) {
+	    echo '<option value="' .$timezones[$i]. '"' .($bannerAds['timezone']==$timezones[$i]?' selected="selected"':''). '>' .$timezones[$i]. '</option>';
+	}
+	echo '</select><hr width="550" /><li><b>Time format</b></li><br><br>This controls only the display of times inputed - it has no functional effect beyond readability.<br><br>Time format: <input type="text" name="timeformat" value="' .$bannerAds['timeformat']. '" />';
+	echo '<hr width="550" /><br /><br /><input type="submit" name="save" value="Save" /> <input type="submit" name="cancel" value="Cancel" />';
         foot();
     }
 }
 function view()
 {
-    global $ads;
+    global $ads,$bannerAds;
     head('Ads');
-    echo '<center><table border="1" bordercolor="#000000" cellspacing="0" cellpadding="1"><tr><td nowrap="nowrap"><span class="smalltext"><b>Name (ID):</b></span></td><td><span class="smalltext"><b>Link URL:</b></span></td><td><span class="smalltext"><b>Image URL:</b></span></td><td><span class="smalltext"><b>Active:</b></span></td><td><span class="smalltext"><b>Weight:</b></span></td><td><span class="smalltext"><b>Ends:</b></span></td><td><span class="smalltext"><b>Left:</b></span></td><td><span class="smalltext"><b>Impressions:</b></span></td><td><span class="smalltext"><b>C/T:</b></span></td></tr>';
+    echo '<center><table border="1" bordercolor="#000000" cellspacing="0" cellpadding="1"><tr><td nowrap="nowrap"><span class="smalltext"><b>Name (ID):</b></span></td><td><span class="smalltext"><b>Link URL:</b></span></td><td><span class="smalltext"><b>Image URL:</b></span></td><td><span class="smalltext"><b>Active:</b></span></td><td><span class="smalltext"><b>Weight:</b></span></td><td><span class="smalltext"><b>Starts:</b></span></td><td><span class="smalltext"><b>Ends:</b></span></td><td><span class="smalltext"><b>Left:</b></span></td><td><span class="smalltext"><b>Impressions:</b></span></td><td><span class="smalltext"><b>C/T:</b></span></td></tr>';
     foreach ($ads as $ad) {
         $data = explode('||', $ad);
-        $enabled = $data[1] ? 'Yes' : '<span class="error">No</span>';
-        if($data[3] == '99999999') {
+        $enabled = $data[ PHPADS_ADELEMENT_ENABLED ] ? 'Yes' : '<span class="error">No</span>';
+        if($data[ PHPADS_ADELEMENT_ENDDATE ] == '99999999') {
             $expires = 'Never';
         } else {
-            $expires = date('m/d/y', $data[3]);
+            $expires = date($bannerAds['timeformat'], $data[ PHPADS_ADELEMENT_ENDDATE ]);
         }
-        if ($data[4] == -1) {
+	if(!$data[ PHPADS_ADELEMENT_STARTDATE ]) {
+            $starts = 'Always';
+	} else {
+	    $starts = date($bannerAds['timeformat'], $data[ PHPADS_ADELEMENT_STARTDATE ]);
+	}
+        if ($data[ PHPADS_ADELEMENT_REMAINING ] == -1) {
             $remaining = 'Unlimited';
         } else {
-            $remaining = $data[4];
+            $remaining = $data[ PHPADS_ADELEMENT_REMAINING ];
         }
-        if (strlen($data[9]) > 25) {
-            $linkUrl = substr($data[9], 0, 15). '...' .substr($data[9], -7);
+        if (strlen($data[ PHPADS_ADELEMENT_LINK_URI ]) > 25) {
+            $linkUrl = substr($data[ PHPADS_ADELEMENT_LINK_URI ], 0, 15). '...' .substr($data[ PHPADS_ADELEMENT_LINK_URI ], -7);
         } else {
-            $linkUrl = $data[9];
+            $linkUrl = $data[ PHPADS_ADELEMENT_LINK_URI ];
         }
-        if (strlen($data[10]) > 25) {
-            $imageUrl = substr($data[10], 0, 15). '...' .substr($data[10], -7);
+        if (strlen($data[ PHPADS_ADELEMENT_IMAGE_URI ]) > 25) {
+            $imageUrl = substr($data[ PHPADS_ADELEMENT_IMAGE_URI ], 0, 15). '...' .substr($data[ PHPADS_ADELEMENT_IMAGE_URI ], -7);
         } else {
-            $imageUrl = $data[10];
+            $imageUrl = $data[ PHPADS_ADELEMENT_IMAGE_URI ];
         }
-        echo "<tr><td nowrap=\"nowrap\"><span class=\"smalltext\"><a href=\"admin.php?action=edit&id=$data[0]\" title=\"Edit Ad\">$data[11] ($data[0])</a></span></td><td nowrap=\"nowrap\"><span class=\"smalltext\"><a href=\"$data[9]\">$linkUrl</a></span></td><td nowrap=\"nowrap\"><span class=\"smalltext\"><a href=\"$data[10]\">$imageUrl</a></span></td><td><span class=\"smalltext\">$enabled</span></td><td><span class=\"smalltext\">$data[2]</span></td><td><span class=\"smalltext\">$expires</span></td><td><span class=\"smalltext\">$remaining</span></td><td><span class=\"smalltext\">$data[5]</span></td><td><span class=\"smalltext\">$data[6]</span></td></tr>";
+        echo "<tr><td nowrap=\"nowrap\"><span class=\"smalltext\"><a href=\"admin.php?action=edit&id=".urlencode($data[ PHPADS_ADELEMENT_ID ])."\" title=\"Edit Ad\">" .$data[ PHPADS_ADELEMENT_NAME ]. " (".$data[ PHPADS_ADELEMENT_ID ].")</a></span></td><td nowrap=\"nowrap\"><span class=\"smalltext\"><a href=\"" .$data[ PHPADS_ADELEMENT_LINK_URI ]. "\">$linkUrl</a></span></td><td nowrap=\"nowrap\"><span class=\"smalltext\"><a href=\"" .$data[ PHPADS_ADELEMENT_IMAGE_URI ]. "\">$imageUrl</a></span></td><td><span class=\"smalltext\">$enabled</span></td><td><span class=\"smalltext\">" .$data[ PHPADS_ADELEMENT_WEIGHTING ]. "</span></td><td><span class=\"smalltext\">$starts</span></td><td><span class=\"smalltext\">$expires</span></td><td><span class=\"smalltext\">$remaining</span></td><td><span class=\"smalltext\">" .$data[ PHPADS_ADELEMENT_IMPRESSIONS ]. "</span></td><td><span class=\"smalltext\">" .$data[ PHPADS_ADELEMENT_CLICKTHRUS ]. "</span></td></tr>";
     }
     echo '</table></center>';
     foot();
@@ -186,26 +207,27 @@ function edit()
             if(ereg('^' .$_POST['id']. '\|\|', $ads[$i])) {
                 $data = explode('||', $ads[$i]);
                 if (isset($_POST['ad_en']) && $_POST['ad_en'] == 1) {
-                    $data[1] = 1;
+                    $data[ PHPADS_ADELEMENT_ENABLED ] = 1;
                 } else {
-                    $data[1] = 0;
+                    $data[ PHPADS_ADELEMENT_ENABLED ] = 0;
                 }
                 if (isset($_POST['ad_reset']) && $_POST['ad_reset'] == 1) {
-                    $data[5] = 0;
-                    $data[6] = 0;
+                    $data[ PHPADS_ADELEMENT_IMPRESSIONS ] = 0;
+                    $data[ PHPADS_ADELEMENT_CLICKTHRUS ] = 0;
                 }
                 if (isset($_POST['ad_noexpires']) && $_POST['ad_noexpires'] == 1) {
-                    $data[3] = '99999999';
+                    $data[ PHPADS_ADELEMENT_ENDDATE ] = '99999999';
                 } else {
-                    $data[3] = mktime(0, 0, 0, $_POST['ad_expires_month'], $_POST['ad_expires_day'], $_POST['ad_expires_year']);
+                    $data[ PHPADS_ADELEMENT_ENDDATE ] = mktime(0, 0, 0, $_POST['ad_expires_month'], $_POST['ad_expires_day'], $_POST['ad_expires_year']);
                 }
-                $data[2] = $_POST['ad_weight'];
-                $data[4] = $_POST['ad_remain'];
-                $data[7] = $_POST['ad_width'];
-                $data[8] = $_POST['ad_height'];
-                $data[9] = $_POST['ad_link'];
-                $data[10] = $_POST['ad_image'];
-                $data[11] = $_POST['ad_name'];
+                $data[ PHPADS_ADELEMENT_WEIGHTING ] = $_POST['ad_weight'];
+                $data[ PHPADS_ADELEMENT_REMAINING ] = $_POST['ad_remain'];
+                $data[ PHPADS_ADELEMENT_WIDTH ] = $_POST['ad_width'];
+                $data[ PHPADS_ADELEMENT_HEIGHT ] = $_POST['ad_height'];
+                $data[ PHPADS_ADELEMENT_LINK_URI ] = $_POST['ad_link'];
+                $data[ PHPADS_ADELEMENT_IMAGE_URI ] = $_POST['ad_image'];
+                $data[ PHPADS_ADELEMENT_NAME ] = $_POST['ad_name'];
+		$data[ PHPADS_ADELEMENT_STARTDATE ] = mktime(0, 0, 0, (int)$_POST['ad_starts_month'], (int)$_POST['ad_starts_day'], (int)$_POST['ad_starts_year']); 
                 $ads[$i] = join('||', $data);
                 break;
             }
@@ -216,6 +238,7 @@ function edit()
         if (!isset($_POST['confirm_delete']) || $_POST['confirm_delete'] != 1) {
             die('You did not confirm the delete. <a href="javascript:window.history.go(-1);">[Back]</a>');
         }
+	$nads = array();
         foreach ($ads as $ad) {
             if(!ereg('^' .$_POST['id']. '\|\|', $ad)) {
                 $nads[] = $ad;
@@ -236,19 +259,21 @@ function edit()
         if (!isset($data)) {
             die('Ad ID ' .$_GET['id']. ' was not found');
         }
-        if ($data[1] == 1) {
+        if ($data[ PHPADS_ADELEMENT_ENABLED ] == 1) {
             $isen = 'checked="checked"';
         } else {
             $isen = '';
         }
-        $expires = dateselect('ad_expires', $data[3]);
-        if ($data[3] == '99999999') {
+        $expires = dateselect('ad_expires', $data[ PHPADS_ADELEMENT_ENDDATE ]);
+        if ($data[ PHPADS_ADELEMENT_ENDDATE ] == '99999999') {
             $noexpires = 'checked="checked"';
         } else {
             $noexpires = '';
         }
+	$starts = dateselect('ad_starts', $data[ PHPADS_ADELEMENT_STARTDATE ]);
+
         head('Edit Ad');
-        echo 'You can edit any of the following properties for Ad ID ' .$_GET['id']. ':<form method="post" action="admin.php"><input type="hidden" name="action" value="edit" /><input type="hidden" name="id" value="' .$_GET['id']. '" /><table width="550" border="1" cellspacing="0" cellpadding="1"><tr><td><b>Ad Name:</b></td><td><input type="text" name="ad_name" value="' .$data[11]. '" size="30" /></td></tr><tr><td><b>Is Enabled?</b></td><td><input type="checkbox" ' .$isen. ' name="ad_en" value="1" /> Ad is Enabled</td></tr><tr><td><b>Link URL:</b></td><td><input type="text" name="ad_link" value="' .$data[9]. '" size="30" /></td></tr><tr><td><b>Image URL:</b></td><td><input type="text" name="ad_image" value="' .$data[10]. '" size="30" /></td></tr><tr><td><b>Image Width:</b></td><td><input type="text" name="ad_width" value="' .$data[7]. '" size="4" /></td></tr><tr><td><b>Image Height:</b></td><td><input type="text" name="ad_height" value="' .$data[8]. '" size="4" /></td></tr><tr><td><b>Weight:</b></td><td><input type="text" name="ad_weight" value="' .$data[2]. '" size="4" /></td></tr><tr><td><b>Impressions:</b> ' .$data[5]. '&nbsp;<b>C/T:</b> ' .$data[6]. '</td><td><input type="checkbox" name="ad_reset" value="1" /> Reset to Zero</td></tr><tr><td><b>Impressions Remaining:</b><br /><span class="smalltext">Set to <b>-1</b> for unlimited</span></td><td><input type="text" name="ad_remain" value="' .$data[4]. '" size="4" /></td></tr><tr><td><b>Expires:</b></td><td>' .$expires. ' <input type="checkbox" name="ad_noexpires" ' .$noexpires. ' value="1" /> Never Expires</td></tr></table><br /><div align="center"><input type="submit" name="save" value="Save" /> <input type="submit" name="cancel" value="Cancel" /><br /><br /><input type="checkbox" name="confirm_delete" value="1" /> Check to Confirm Delete<br /><input type="submit" name="delete" value="Delete This Ad" /><br /><br /><br /><span class="smalltext">Ad Preview:</span><br /><a href="' .$data[9]. '" target="_blank"><img src="' .$data[10]. '" alt="' .$data[11]. '" width="' .$data[7]. '" height="' .$data[8]. '" border="0" /></a></div></form>';
+        echo 'You can edit any of the following properties for Ad ID ' .$_GET['id']. ':<form method="post" action="admin.php"><input type="hidden" name="action" value="edit" /><input type="hidden" name="id" value="' .$_GET['id']. '" /><table width="550" border="1" cellspacing="0" cellpadding="1"><tr><td><b>Ad Name:</b></td><td><input type="text" name="ad_name" value="' .$data[ PHPADS_ADELEMENT_NAME ]. '" size="30" /></td></tr><tr><td><b>Is Enabled?</b></td><td><input type="checkbox" ' .$isen. ' name="ad_en" value="1" /> Ad is Enabled</td></tr><tr><td><b>Link URL:</b></td><td><input type="text" name="ad_link" value="' .$data[ PHPADS_ADELEMENT_LINK_URI ]. '" size="30" /></td></tr><tr><td><b>Image URL:</b></td><td><input type="text" name="ad_image" value="' .$data[ PHPADS_ADELEMENT_IMAGE_URI ]. '" size="30" /></td></tr><tr><td><b>Image Width:</b></td><td><input type="text" name="ad_width" value="' .$data[ PHPADS_ADELEMENT_WIDTH ]. '" size="4" /></td></tr><tr><td><b>Image Height:</b></td><td><input type="text" name="ad_height" value="' .$data[ PHPADS_ADELEMENT_HEIGHT ]. '" size="4" /></td></tr><tr><td><b>Weight:</b></td><td><input type="text" name="ad_weight" value="' .$data[ PHPADS_ADELEMENT_WEIGHTING ]. '" size="4" /></td></tr><tr><td><b>Impressions:</b> ' .$data[ PHPADS_ADELEMENT_IMPRESSIONS ]. '&nbsp;<b>C/T:</b> ' .$data[ PHPADS_ADELEMENT_CLICKTHRUS ]. '</td><td><input type="checkbox" name="ad_reset" value="1" /> Reset to Zero</td></tr><tr><td><b>Impressions Remaining:</b><br /><span class="smalltext">Set to <b>-1</b> for unlimited</span></td><td><input type="text" name="ad_remain" value="' .$data[ PHPADS_ADELEMENT_REMAINING ]. '" size="4" /></td></tr><tr><th>Starts</th><td>'.$starts.'</td></tr><tr><td><b>Expires:</b></td><td>' .$expires. ' <input type="checkbox" name="ad_noexpires" ' .$noexpires. ' value="1" /> Never Expires</td></tr></table><br /><div align="center"><input type="submit" name="save" value="Save" /> <input type="submit" name="cancel" value="Cancel" /><br /><br /><input type="checkbox" name="confirm_delete" value="1" /> Check to Confirm Delete<br /><input type="submit" name="delete" value="Delete This Ad" /><br /><br /><br /><span class="smalltext">Ad Preview:</span><br /><a href="' .$data[ PHPADS_ADELEMENT_LINK_URI ]. '" target="_blank"><img src="' .$data[ PHPADS_ADELEMENT_IMAGE_URI ]. '" alt="' .$data[ PHPADS_ADELEMENT_NAME ]. '" width="' .$data[ PHPADS_ADELEMENT_WIDTH ]. '" height="' .$data[ PHPADS_ADELEMENT_HEIGHT ]. '" border="0" /></a></div></form>';
         foot();
     }
 }
@@ -258,30 +283,31 @@ function add()
     if (isset($_POST['save'])) {
         $data = array(11);
         if ($_POST['ad_custom_id'] != '') {
-            $data[0] = $_POST['ad_custom_id'];
+            $data[ PHPADS_ADELEMENT_ID ] = $_POST['ad_custom_id'];
         } else {
-            $data[0] = $bannerAds['next_autoindex'];
+            $data[ PHPADS_ADELEMENT_ID ] = $bannerAds['next_autoindex'];
             $bannerAds['next_autoindex']++;
         }
         if (isset($_POST['ad_en']) && $_POST['ad_en'] == 1) {
-            $data[1] = 1;
+            $data[ PHPADS_ADELEMENT_ENABLED ] = 1;
         } else {
-            $data[1] = 0;
+            $data[ PHPADS_ADELEMENT_ENABLED ] = 0;
         }
-        $data[2] = $_POST['ad_weight'];
+        $data[ PHPADS_ADELEMENT_WEIGHTING ] = $_POST['ad_weight'];
         if (isset($_POST['ad_noexpires']) && $_POST['ad_noexpires'] == 1) {
-            $data[3] = '99999999';
+            $data[ PHPADS_ADELEMENT_ENDDATE ] = '99999999';
         } else {
-            $data[3] = mktime(0, 0, 0, $_POST['ad_expires_month'], $_POST['ad_expires_day'], $_POST['ad_expires_year']);
+            $data[ PHPADS_ADELEMENT_ENDDATE ] = mktime(0, 0, 0, $_POST['ad_expires_month'], $_POST['ad_expires_day'], $_POST['ad_expires_year']);
         }
-        $data[4] = $_POST['ad_remain'];
-        $data[5] = 0;
-        $data[6] = 0;
-        $data[7] = $_POST['ad_width'];
-        $data[8] = $_POST['ad_height'];
-        $data[9] = $_POST['ad_link'];
-        $data[10] = $_POST['ad_image'];
-        $data[11] = stripslashes($_POST['ad_name']);
+        $data[ PHPADS_ADELEMENT_REMAINING ] = $_POST['ad_remain'];
+        $data[ PHPADS_ADELEMENT_IMPRESSIONS ] = 0;
+        $data[ PHPADS_ADELEMENT_CLICKTHRUS ] = 0;
+        $data[ PHPADS_ADELEMENT_WIDTH ] = $_POST['ad_width'];
+        $data[ PHPADS_ADELEMENT_HEIGHT ] = $_POST['ad_height'];
+        $data[ PHPADS_ADELEMENT_LINK_URI ] = $_POST['ad_link'];
+        $data[ PHPADS_ADELEMENT_IMAGE_URI ] = $_POST['ad_image'];
+        $data[ PHPADS_ADELEMENT_NAME ] = stripslashes($_POST['ad_name']);
+	$data[ PHPADS_ADELEMENT_STARTDATE ] = mktime(0, 0, 0, (int)$_POST['ad_starts_month'], (int)$_POST['ad_starts_day'], (int)$_POST['ad_starts_year']);
         $ads[] = join('||', $data);
         writeads();
         menu();
@@ -289,8 +315,9 @@ function add()
         menu();
     } else {
         $expires = dateselect('ad_expires', '99999999');
+	$starts = dateselect('ad_starts', time());
         head('Add Ad');
-        echo '<form method="post" action="admin.php"><input type="hidden" name="action" value="add"><table width="550" border="1" cellspacing="0" cellpadding="1"><tr><td><b>Custom Ad ID:</b><br /><span class="smalltext">Letters and numbers only<br />Leave blank if no custom ID</span></td><td><input type="text" name="ad_custom_id" size="30" /></td></tr><tr><td><b>Ad Name:</b></td><td><input type="text" name="ad_name" value="New Ad" size="30" /></td></tr><tr><td><b>Is Enabled?</b></td><td><input type="checkbox" checked="checked" name="ad_en" value="1" /> Ad is Enabled</td></tr><tr><td><b>Link URL:</b></td><td><input type="text" name="ad_link" value="http://" size="30" /></td></tr><tr><td><b>Image URL:</b></td><td><input type="text" name="ad_image" value="http://" size="30" /></td></tr><tr><td><b>Image Width:</b></td><td><input type="text" name="ad_width" value="468" size="4" /></td></tr><tr><td><b>Image Height:</b></td><td><input type="text" name="ad_height" value="60" size="4" /></td></tr><tr><td><b>Weight:</b></td><td><input type="text" name="ad_weight" value="1" size="4" /></td></tr><tr><td><b>Impressions Remaining:</b><br/><span class="smalltext">Set to <b>-1</b> for unlimited</span></td><td><input type="text" name="ad_remain" value="-1" size="4" /></td></tr><tr><td><b>Expires:</b></td><td>' .$expires. ' <input type="checkbox" name="ad_noexpires" checked="checked" value="1" /> Never Expires</td></tr></table><br /><div align="center"><input type="submit" name="save" value="Save" /> <input type="submit" name="cancel" value="Cancel" /></div></form>';
+        echo '<form method="post" action="admin.php"><input type="hidden" name="action" value="add"><table width="550" border="1" cellspacing="0" cellpadding="1"><tr><td><b>Custom Ad ID:</b><br /><span class="smalltext">Letters and numbers only<br />Leave blank if no custom ID</span></td><td><input type="text" name="ad_custom_id" size="30" /></td></tr><tr><td><b>Ad Name:</b></td><td><input type="text" name="ad_name" value="New Ad" size="30" /></td></tr><tr><td><b>Is Enabled?</b></td><td><input type="checkbox" checked="checked" name="ad_en" value="1" /> Ad is Enabled</td></tr><tr><td><b>Link URL:</b></td><td><input type="text" name="ad_link" value="http://" size="30" /></td></tr><tr><td><b>Image URL:</b></td><td><input type="text" name="ad_image" value="http://" size="30" /></td></tr><tr><td><b>Image Width:</b></td><td><input type="text" name="ad_width" value="468" size="4" /></td></tr><tr><td><b>Image Height:</b></td><td><input type="text" name="ad_height" value="60" size="4" /></td></tr><tr><td><b>Weight:</b></td><td><input type="text" name="ad_weight" value="1" size="4" /></td></tr><tr><td><b>Impressions Remaining:</b><br/><span class="smalltext">Set to <b>-1</b> for unlimited</span></td><td><input type="text" name="ad_remain" value="-1" size="4" /></td></tr><tr><th>Starts</th><td>'.$starts.'</td></tr><tr><td><b>Expires:</b></td><td>' .$expires. ' <input type="checkbox" name="ad_noexpires" checked="checked" value="1" /> Never Expires</td></tr></table><br /><div align="center"><input type="submit" name="save" value="Save" /> <input type="submit" name="cancel" value="Cancel" /></div></form>';
         foot();
     }
 }
@@ -319,14 +346,14 @@ global $bannerAds;
             for ($i = 1; $i <= $_POST['numtypes']; $i++) {
                 if ($_POST["adID_$i"] != '') {
                     echo "\n/* Code to display ad ID " .$_POST["adID_$i"]. " */\n";
-                    echo "&lt;?php \$buttons$i = new digiAds (" .$_POST["adID_$i"]. "); ?&gt;\n";
-                    echo "&lt;?php echo \$buttons" .$i. "->ad[0]; ?&gt;\n";
+                    echo "&lt;?php \$buttons$i = new bannerAds ('" .$_POST["adID_$i"]. "'); ?&gt;\n";
+                    echo "&lt;?php echo \$buttons" .$i. "->ad[ PHPADS_ADELEMENT_ID ]; ?&gt;\n";
                 } else {
                     echo "\n/* Code to display " .$_POST["numads_$i"]. " ad(s)";
                     if (($_POST["width_$i"] != '') && ($_POST["height_$i"] != '')) {
                         echo " with width of " .$_POST["width_$i"]. " and height of " .$_POST["height_$i"];
                     }
-                    echo " */\n&lt;?php \$buttons$i = new digiAds (null, " .$_POST["numads_$i"];
+                    echo " */\n&lt;?php \$buttons$i = new bannerAds (null, " .$_POST["numads_$i"];
                     if (($_POST["width_$i"] != '') && ($_POST["height_$i"] != '')) {
                         echo ", " .$_POST["width_$i"]. ", " .$_POST["height_$i"];
                     }
@@ -359,6 +386,51 @@ global $bannerAds;
         foot();
     }
 }
+function fileupload()
+{
+    if (isset($_POST['submit'])) {
+	head('File upload...');
+	$target_dir = "uploads/";
+	$target_file = $target_dir . basename($_FILES["fileToUpload"]["name"]);
+	$uploadOk = 1;
+	$imageFileType = pathinfo($target_file,PATHINFO_EXTENSION);
+
+	// Allow image uploads
+        $check = getimagesize($_FILES["fileToUpload"]["tmp_name"]);
+	if($check !== false) {
+	    $uploadOk = 1;
+	} else {
+	    echo "File is not an image.<br />";
+	    $uploadOk = 0;
+	}
+	// Check if file already exists
+	if (file_exists($target_file)) {
+	    echo "Sorry, a file already exists with that name.<br />";
+	    $uploadOk = 0;
+	}
+	// Allow certain file formats
+	if($imageFileType != "jpg" && $imageFileType != "png" && $imageFileType != "jpeg" && $imageFileType != "gif" ) {
+	    echo "Sorry, only JPG, JPEG, PNG & GIF files are allowed.<br />";
+	    $uploadOk = 0;
+	}
+	if (!$uploadOk) {
+	    echo "Your file was not uploaded.";
+	// if everything is ok, try to upload file
+	} else {
+	    if (move_uploaded_file($_FILES["fileToUpload"]["tmp_name"], $target_file)) {
+	        echo "<strong>The file ". basename( $_FILES["fileToUpload"]["name"]). " has been uploaded.</strong><br /><br />The URL for this image is:<br />http://".$_SERVER['SERVER_NAME']."/uploads/". basename( $_FILES["fileToUpload"]["name"]);
+	    } else {
+	        echo "Sorry, there was an error uploading your file.";
+	    }
+	}
+	foot();
+    } else {
+        head('File upload');
+        echo '<form method="post" enctype="multipart/form-data">Select image to upload:<input type="file" name="fileToUpload" id="fileToUpload"><br /><input type="submit" value="Upload Image" name="submit"></form>';
+        foot();
+    }
+}
+
 function logout()
 {
     setcookie('user', '');
