@@ -81,12 +81,14 @@ function dateselect($name, $date)
 }
 function head($title)
 {
-    echo '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" /><title>PHPads - admin - ' .$title. '</title><style type="text/css">body, td{font-family:arial;font-size:10px;color:#000000;background-color:#D8E7D3;}b{font-weight:bold;}h1{font-size:12px;}.smalltext{font-size:10px;}.error{color:#ff0000;}</style></head><body><div align="center"><img src="phpads-main.png" alt="PHPads">
+    echo '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" /><title>PHPads - admin - ' .$title. '</title><link href="jquery-ui-1.11.4.custom/jquery-ui.css" rel="stylesheet"><style type="text/css">body, td{font-family:arial;font-size:10px;color:#000000;background-color:#D8E7D3;}b{font-weight:bold;}h1{font-size:12px;}.smalltext{font-size:10px;}.error{color:#ff0000;}</style><script src="jquery-ui-1.11.4.custom/external/jquery/jquery.js"></script><script src="jquery-ui-1.11.4.custom/jquery-ui.js"></script></head><body><div align="center"><img src="phpads-main.png" alt="PHPads">
 <br><b>' .$title. '</b></div><br /><br /><table align="center" width="550" border="0" cellspacing="2" cellpadding="2"><tr><td align="left">';
 }
 function foot()
 {
-    echo '</td></tr></table><br /><br /><div align="center"><hr width="550"><span class="smalltext"><a href="admin.php?action=config">Configuration</a> | <a href="admin.php?action=list">List Ads</a> | <a href="admin.php?action=add">Add Ad</a> | <a href="admin.php?action=fileupload">File upload</a> | <a href="admin.php?action=codegen">Code Generator</a> | <a href="admin.php?action=logout">Logout</a><p><a href="http://blondish.net/">PHPads</a></span></div></body></html>';
+    echo '</td></tr></table><br /><br /><div align="center"><hr width="550"><span class="smalltext"><a href="admin.php?action=config">Configuration</a> | <a href="admin.php?action=list">List Ads</a> | <a href="admin.php?action=add">Add Ad</a> | <a href="admin.php?action=fileupload">File upload</a> | <a href="admin.php?action=codegen">Code Generator</a> | <a href="admin.php?action=logout">Logout</a><p><a href="http://blondish.net/">PHPads</a></span></div>';
+    echo '<script>$("input[type=submit]").button();</script>';
+    echo '</body></html>';
 }
 function auth()
 {
@@ -123,13 +125,14 @@ function config()
         if ($_POST['newpass'] != '**********') {
             $bannerAds['pass'] = md5(trim($_POST['newpass']));
         }
-        $bannerAds['click_url'] = trim($_POST['click_url']);
-        $bannerAds['js_url'] = trim($_POST['js_url']);
-        $bannerAds['target'] = trim($_POST['target']);
-        $bannerAds['border'] = $_POST['border'];
-	$bannerAds['default_display'] = trim($_POST['default_display']);
-	$bannerAds['timezone'] = trim($_POST['timezone']);
-	$bannerAds['timeformat'] = trim($_POST['timeformat']);
+        $bannerAds['click_url'] 	= trim($_POST['click_url']);
+        $bannerAds['js_url'] 		= trim($_POST['js_url']);
+        $bannerAds['target'] 		= trim($_POST['target']);
+        $bannerAds['border'] 		= (int)$_POST['border'];
+	$bannerAds['default_display'] 	= trim($_POST['default_display']);
+	$bannerAds['timezone'] 		= trim($_POST['timezone']);
+	$bannerAds['timeformat'] 	= trim($_POST['timeformat']);
+	$bannerAds['blockip'] 		= trim($_POST['blockip']);
         writeads();
         menu();
     } else if (isset($_POST['cancel'])) {
@@ -154,6 +157,7 @@ function config()
 	    echo '<option value="' .$timezones[$i]. '"' .($bannerAds['timezone']==$timezones[$i]?' selected="selected"':''). '>' .$timezones[$i]. '</option>';
 	}
 	echo '</select><hr width="550" /><li><b>Time format</b></li><br><br>This controls only the display of times inputed - it has no functional effect beyond readability.<br><br>Time format: <input type="text" name="timeformat" value="' .$bannerAds['timeformat']. '" />';
+	echo '<hr width="550" /><li><b>Blocked IP Address:</b></li><br><br>If you want to exclude a particular IP (your office maybe) from counting towards the impressions and click through counts, enter it here (or leave blank). <br><br>IP Address: <input type="text" name="blockip" value="' .$bannerAds['blockip']. '" />';
 	echo '<hr width="550" /><br /><br /><input type="submit" name="save" value="Save" /> <input type="submit" name="cancel" value="Cancel" />';
         foot();
     }
@@ -162,7 +166,7 @@ function view()
 {
     global $ads,$bannerAds;
     head('Ads');
-    echo '<center><table border="1" bordercolor="#000000" cellspacing="0" cellpadding="1"><tr><td nowrap="nowrap"><span class="smalltext"><b>Name (ID):</b></span></td><td><span class="smalltext"><b>Link URL:</b></span></td><td><span class="smalltext"><b>Image URL:</b></span></td><td><span class="smalltext"><b>Active:</b></span></td><td><span class="smalltext"><b>Weight:</b></span></td><td><span class="smalltext"><b>Starts:</b></span></td><td><span class="smalltext"><b>Ends:</b></span></td><td><span class="smalltext"><b>Left:</b></span></td><td><span class="smalltext"><b>Impressions:</b></span></td><td><span class="smalltext"><b>C/T:</b></span></td></tr>';
+    echo '<center><table border="1" bordercolor="#000000" cellspacing="0" cellpadding="1"><tr><th>Type</th><td nowrap="nowrap"><span class="smalltext"><b>Name (ID):</b></span></td><td><span class="smalltext"><b>Link URL:</b></span></td><td><span class="smalltext"><b>Image URL:</b></span></td><td><span class="smalltext"><b>Active:</b></span></td><td><span class="smalltext"><b>Weight:</b></span></td><td><span class="smalltext"><b>Starts:</b></span></td><td><span class="smalltext"><b>Ends:</b></span></td><td><span class="smalltext"><b>Left:</b></span></td><td><span class="smalltext"><b>Impressions:</b></span></td><td><span class="smalltext"><b>C/T:</b></span></td></tr>';
     foreach ($ads as $ad) {
         $data = explode('||', $ad);
         $enabled = $data[ PHPADS_ADELEMENT_ENABLED ] ? 'Yes' : '<span class="error">No</span>';
@@ -191,7 +195,7 @@ function view()
         } else {
             $imageUrl = $data[ PHPADS_ADELEMENT_IMAGE_URI ];
         }
-        echo "<tr><td nowrap=\"nowrap\"><span class=\"smalltext\"><a href=\"admin.php?action=edit&id=".urlencode($data[ PHPADS_ADELEMENT_ID ])."\" title=\"Edit Ad\">" .$data[ PHPADS_ADELEMENT_NAME ]. " (".$data[ PHPADS_ADELEMENT_ID ].")</a></span></td><td nowrap=\"nowrap\"><span class=\"smalltext\"><a href=\"" .$data[ PHPADS_ADELEMENT_LINK_URI ]. "\">$linkUrl</a></span></td><td nowrap=\"nowrap\"><span class=\"smalltext\"><a href=\"" .$data[ PHPADS_ADELEMENT_IMAGE_URI ]. "\">$imageUrl</a></span></td><td><span class=\"smalltext\">$enabled</span></td><td><span class=\"smalltext\">" .$data[ PHPADS_ADELEMENT_WEIGHTING ]. "</span></td><td><span class=\"smalltext\">$starts</span></td><td><span class=\"smalltext\">$expires</span></td><td><span class=\"smalltext\">$remaining</span></td><td><span class=\"smalltext\">" .$data[ PHPADS_ADELEMENT_IMPRESSIONS ]. "</span></td><td><span class=\"smalltext\">" .$data[ PHPADS_ADELEMENT_CLICKTHRUS ]. "</span></td></tr>";
+        echo "<tr><td>" .($data[ PHPADS_ADELEMENT_ADTYPE ]==0?'Image':'Other'). "</td><td nowrap=\"nowrap\"><span class=\"smalltext\"><a href=\"admin.php?action=edit&id=".urlencode($data[ PHPADS_ADELEMENT_ID ])."\" title=\"Edit Ad\">" .$data[ PHPADS_ADELEMENT_NAME ]. " (".$data[ PHPADS_ADELEMENT_ID ].")</a></span></td><td nowrap=\"nowrap\"><span class=\"smalltext\"><a href=\"" .$data[ PHPADS_ADELEMENT_LINK_URI ]. "\">$linkUrl</a></span></td><td nowrap=\"nowrap\"><span class=\"smalltext\"><a href=\"" .$data[ PHPADS_ADELEMENT_IMAGE_URI ]. "\">$imageUrl</a></span></td><td><span class=\"smalltext\">$enabled</span></td><td><span class=\"smalltext\">" .$data[ PHPADS_ADELEMENT_WEIGHTING ]. "</span></td><td><span class=\"smalltext\">$starts</span></td><td><span class=\"smalltext\">$expires</span></td><td><span class=\"smalltext\">$remaining</span></td><td><span class=\"smalltext\">" .$data[ PHPADS_ADELEMENT_IMPRESSIONS ]. "</span></td><td><span class=\"smalltext\">" .$data[ PHPADS_ADELEMENT_CLICKTHRUS ]. "</span></td></tr>";
     }
     echo '</table></center>';
     foot();
@@ -228,7 +232,17 @@ function edit()
                 $data[ PHPADS_ADELEMENT_IMAGE_URI ] = $_POST['ad_image'];
                 $data[ PHPADS_ADELEMENT_NAME ] = $_POST['ad_name'];
 		$data[ PHPADS_ADELEMENT_STARTDATE ] = mktime(0, 0, 0, (int)$_POST['ad_starts_month'], (int)$_POST['ad_starts_day'], (int)$_POST['ad_starts_year']); 
+		$data[ PHPADS_ADELEMENT_ADTYPE ] = (int)$_POST['ad_type'];
                 $ads[$i] = join('||', $data);
+
+		if ($data[PHPADS_ADELEMENT_ADTYPE]==PHPADS_ADTYPE_OTHER) {
+		    $data = fopen('uploads/'.$_POST['id']."_".$data[ PHPADS_ADELEMENT_NAME ].'.inc.txt', 'w');
+		    flock($data, 2);
+	    	    fputs($data, $_POST['otherinfo']);
+		    flock($data, 3);
+		    fclose($data);
+		}
+
                 break;
             }
         }
@@ -272,8 +286,22 @@ function edit()
         }
 	$starts = dateselect('ad_starts', $data[ PHPADS_ADELEMENT_STARTDATE ]);
 
+	if ($data[PHPADS_ADELEMENT_ADTYPE]==PHPADS_ADTYPE_OTHER) {
+	    $data[ PHPADS_ADELEMENT_OTHERCONTENT ] = str_replace("\n","",implode("",file('uploads/'.$data[PHPADS_ADELEMENT_ID]."_".$data[PHPADS_ADELEMENT_NAME].'.inc.txt')));
+	} else {
+	   $data[ PHPADS_ADELEMENT_OTHERCONTENT ] = '';
+	}
+
         head('Edit Ad');
-        echo 'You can edit any of the following properties for Ad ID ' .$_GET['id']. ':<form method="post" action="admin.php"><input type="hidden" name="action" value="edit" /><input type="hidden" name="id" value="' .$_GET['id']. '" /><table width="550" border="1" cellspacing="0" cellpadding="1"><tr><td><b>Ad Name:</b></td><td><input type="text" name="ad_name" value="' .$data[ PHPADS_ADELEMENT_NAME ]. '" size="30" /></td></tr><tr><td><b>Is Enabled?</b></td><td><input type="checkbox" ' .$isen. ' name="ad_en" value="1" /> Ad is Enabled</td></tr><tr><td><b>Link URL:</b></td><td><input type="text" name="ad_link" value="' .$data[ PHPADS_ADELEMENT_LINK_URI ]. '" size="30" /></td></tr><tr><td><b>Image URL:</b></td><td><input type="text" name="ad_image" value="' .$data[ PHPADS_ADELEMENT_IMAGE_URI ]. '" size="30" /></td></tr><tr><td><b>Image Width:</b></td><td><input type="text" name="ad_width" value="' .$data[ PHPADS_ADELEMENT_WIDTH ]. '" size="4" /></td></tr><tr><td><b>Image Height:</b></td><td><input type="text" name="ad_height" value="' .$data[ PHPADS_ADELEMENT_HEIGHT ]. '" size="4" /></td></tr><tr><td><b>Weight:</b></td><td><input type="text" name="ad_weight" value="' .$data[ PHPADS_ADELEMENT_WEIGHTING ]. '" size="4" /></td></tr><tr><td><b>Impressions:</b> ' .$data[ PHPADS_ADELEMENT_IMPRESSIONS ]. '&nbsp;<b>C/T:</b> ' .$data[ PHPADS_ADELEMENT_CLICKTHRUS ]. '</td><td><input type="checkbox" name="ad_reset" value="1" /> Reset to Zero</td></tr><tr><td><b>Impressions Remaining:</b><br /><span class="smalltext">Set to <b>-1</b> for unlimited</span></td><td><input type="text" name="ad_remain" value="' .$data[ PHPADS_ADELEMENT_REMAINING ]. '" size="4" /></td></tr><tr><th>Starts</th><td>'.$starts.'</td></tr><tr><td><b>Expires:</b></td><td>' .$expires. ' <input type="checkbox" name="ad_noexpires" ' .$noexpires. ' value="1" /> Never Expires</td></tr></table><br /><div align="center"><input type="submit" name="save" value="Save" /> <input type="submit" name="cancel" value="Cancel" /><br /><br /><input type="checkbox" name="confirm_delete" value="1" /> Check to Confirm Delete<br /><input type="submit" name="delete" value="Delete This Ad" /><br /><br /><br /><span class="smalltext">Ad Preview:</span><br /><a href="' .$data[ PHPADS_ADELEMENT_LINK_URI ]. '" target="_blank"><img src="' .$data[ PHPADS_ADELEMENT_IMAGE_URI ]. '" alt="' .$data[ PHPADS_ADELEMENT_NAME ]. '" width="' .$data[ PHPADS_ADELEMENT_WIDTH ]. '" height="' .$data[ PHPADS_ADELEMENT_HEIGHT ]. '" border="0" /></a></div></form>';
+	echo '<script src="ckeditor/ckeditor.js"></script>';
+        echo 'You can edit any of the following properties for Ad ID ' .$_GET['id']. ':<form method="post" action="admin.php"><input type="hidden" name="action" value="edit" /><input type="hidden" name="id" value="' .$_GET['id']. '" /><table width="550" border="1" cellspacing="0" cellpadding="1"><tr><td><b>Ad Name:</b></td><td><input type="text" name="ad_name" value="' .$data[ PHPADS_ADELEMENT_NAME ]. '" size="30" /></td></tr><tr><td><b>Is Enabled?</b></td><td><input type="checkbox" ' .$isen. ' name="ad_en" value="1" /> Ad is Enabled</td></tr>';
+	echo '<tr><th>Ad Type:</th><td><select name="ad_type" id="ad_type"><option value="'.PHPADS_ADTYPE_IMAGE.'"'.($data[PHPADS_ADELEMENT_ADTYPE]==PHPADS_ADTYPE_IMAGE?' selected="selected"':'').'>Image</option><option value="'.PHPADS_ADTYPE_OTHER.'"'.($data[PHPADS_ADELEMENT_ADTYPE]==PHPADS_ADTYPE_OTHER?' selected="selected"':'').'>Other</option></select></td><tr>';
+	echo '<tr class="otherrow"><th>Other ad format:</th><td><textarea class="ckeditor" name="otherinfo" wrap="virtual" cols="50" rows="10">' .$data[ PHPADS_ADELEMENT_OTHERCONTENT ]. '</textarea></td></tr>';
+	echo '<tr class="imagerow"><td><b>Link URL:</b></td><td><input type="text" name="ad_link" value="' .$data[ PHPADS_ADELEMENT_LINK_URI ]. '" size="30" /></td></tr>';
+	echo '<tr class="imagerow"><td><b>Image URL:</b></td><td><input type="text" name="ad_image" value="' .$data[ PHPADS_ADELEMENT_IMAGE_URI ]. '" size="30" /></td></tr>';
+	echo '<tr><td><b>Image Width:</b></td><td><input type="text" name="ad_width" value="' .$data[ PHPADS_ADELEMENT_WIDTH ]. '" size="4" /></td></tr>';
+	echo '<tr><td><b>Image Height:</b></td><td><input type="text" name="ad_height" value="' .$data[ PHPADS_ADELEMENT_HEIGHT ]. '" size="4" /></td></tr><tr><td><b>Weight:</b></td><td><input type="text" name="ad_weight" value="' .$data[ PHPADS_ADELEMENT_WEIGHTING ]. '" size="4" /></td></tr><tr><td><b>Impressions:</b> ' .$data[ PHPADS_ADELEMENT_IMPRESSIONS ]. '&nbsp;<b>C/T:</b> ' .$data[ PHPADS_ADELEMENT_CLICKTHRUS ]. '</td><td><input type="checkbox" name="ad_reset" value="1" /> Reset to Zero</td></tr><tr><td><b>Impressions Remaining:</b><br /><span class="smalltext">Set to <b>-1</b> for unlimited</span></td><td><input type="text" name="ad_remain" value="' .$data[ PHPADS_ADELEMENT_REMAINING ]. '" size="4" /></td></tr><tr><th>Starts</th><td>'.$starts.'</td></tr><tr><td><b>Expires:</b></td><td>' .$expires. ' <input type="checkbox" name="ad_noexpires" ' .$noexpires. ' value="1" /> Never Expires</td></tr></table><br /><div align="center"><input type="submit" name="save" value="Save" /> <input type="submit" name="cancel" value="Cancel" /><br /><br /><input type="checkbox" name="confirm_delete" value="1" /> Check to Confirm Delete<br /><input type="submit" name="delete" value="Delete This Ad" /><br /><br /><br /><span class="smalltext">Ad Preview:</span><br /><a href="' .$data[ PHPADS_ADELEMENT_LINK_URI ]. '" target="_blank"><img src="' .$data[ PHPADS_ADELEMENT_IMAGE_URI ]. '" alt="' .$data[ PHPADS_ADELEMENT_NAME ]. '" width="' .$data[ PHPADS_ADELEMENT_WIDTH ]. '" height="' .$data[ PHPADS_ADELEMENT_HEIGHT ]. '" border="0" /></a></div></form>';
+	echo '<script>$(".' .($data[PHPADS_ADELEMENT_ADTYPE]==PHPADS_ADTYPE_OTHER?'image':'other'). 'row").hide();$("#ad_type").change(function(){ $("."+($(this).val()=='.PHPADS_ADTYPE_OTHER.'?"image":"other")+"row").hide();$("."+($(this).val()=='.PHPADS_ADTYPE_OTHER.'?"other":"image")+"row").show(); });</script>';
         foot();
     }
 }
