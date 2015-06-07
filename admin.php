@@ -93,12 +93,6 @@ function adform($data, $mode) {
         }
         $starts = dateselect('ad_starts', $data[ PHPADS_ADELEMENT_STARTDATE ]);
 
-        if ($data[PHPADS_ADELEMENT_ADTYPE]==PHPADS_ADTYPE_OTHER) {
-            $data[ PHPADS_ADELEMENT_OTHERCONTENT ] = str_replace("\n","",implode("",file('uploads/'.$data[PHPADS_ADELEMENT_ID]."_".$data[PHPADS_ADELEMENT_NAME].'.inc.txt')));
-        } else {
-           $data[ PHPADS_ADELEMENT_OTHERCONTENT ] = '';
-        }
-
         echo '<script src="ckeditor/ckeditor.js"></script>';
         echo 'You can edit any of the following properties for Ad ' .$data[PHPADS_ADELEMENT_ID]. ':';
 	echo '<form method="post" action="admin.php">';
@@ -127,10 +121,15 @@ function adform($data, $mode) {
         echo '</table>';
         echo '<br /><div align="center"><input type="submit" name="save" value="Save" /> <input type="submit" name="cancel" value="Cancel" />';
 	if ($mode=='edit') {
-	    echo '<br /><br /><input type="checkbox" name="confirm_delete" value="1" /> Check to Confirm Delete<br /><input type="submit" name="delete" value="Delete This Ad" /><br /><br /><br /><span class="smalltext">Ad Preview:</span><br /><a href="' .$data[ PHPADS_ADELEMENT_LINK_URI ]. '" target="_blank"><img src="' .$data[ PHPADS_ADELEMENT_IMAGE_URI ]. '" alt="' .$data[ PHPADS_ADELEMENT_NAME ]. '" width="' .$data[ PHPADS_ADELEMENT_WIDTH ]. '" height="' .$data[ PHPADS_ADELEMENT_HEIGHT ]. '" border="0" /></a>';
+	    echo '<br /><br /><input type="checkbox" name="confirm_delete" value="1" /> Check to Confirm Delete<br /><input type="submit" name="delete" value="Delete This Ad" /><br /><br /><br /><span class="smalltext">Ad Preview:</span><br />';
+	    if ($data[PHPADS_ADELEMENT_ADTYPE]==PHPADS_ADTYPE_OTHER) {
+		echo '<div width="' .$data[ PHPADS_ADELEMENT_WIDTH ]. '" height="' .$data[ PHPADS_ADELEMENT_HEIGHT ]. '">' .$data[ PHPADS_ADELEMENT_OTHERCONTENT ]. '</div>';
+	    } elseif ($data[PHPADS_ADELEMENT_ADTYPE]==PHPADS_ADTYPE_IMAGE) {
+		echo '<a href="' .$data[ PHPADS_ADELEMENT_LINK_URI ]. '" target="_blank"><img src="' .$data[ PHPADS_ADELEMENT_IMAGE_URI ]. '" alt="' .$data[ PHPADS_ADELEMENT_NAME ]. '" width="' .$data[ PHPADS_ADELEMENT_WIDTH ]. '" height="' .$data[ PHPADS_ADELEMENT_HEIGHT ]. '" border="0" /></a>';
+	    }
 	}
 	echo '</div></form>';
-        echo '<script>$(".' .($data[PHPADS_ADELEMENT_ADTYPE]==PHPADS_ADTYPE_OTHER?'image':'other'). 'row").hide();$("#ad_type").change(function(){ $("."+($(this).val()=='.PHPADS_ADTYPE_OTHER.'?"image":"other")+"row").hide();$("."+($(this).val()=='.PHPADS_ADTYPE_OTHER.'?"other":"image")+"row").show(); });</script>';
+        echo '<script>$(".' .($data[PHPADS_ADELEMENT_ADTYPE]==PHPADS_ADTYPE_OTHER?'image':'other'). 'row").hide();$("#ad_type").change(function(){ $("."+($(this).val()=='.PHPADS_ADTYPE_OTHER.'?"image":"other")+"row").hide();$("."+($(this).val()=='.PHPADS_ADTYPE_OTHER.'?"other":"image")+"row").show(); }); CKEDITOR.instances.editor1.setData( "' .str_replace('"', '\\"', $data[ PHPADS_ADELEMENT_OTHERCONTENT ]). '" );</script>';
 }
 function head($title)
 {
@@ -286,21 +285,15 @@ function edit()
                 $data[ PHPADS_ADELEMENT_NAME ] = $_POST['ad_name'];
 		$data[ PHPADS_ADELEMENT_STARTDATE ] = mktime(0, 0, 0, (int)$_POST['ad_starts_month'], (int)$_POST['ad_starts_day'], (int)$_POST['ad_starts_year']); 
 		$data[ PHPADS_ADELEMENT_ADTYPE ] = (int)$_POST['ad_type'];
-                $ads[$i] = join('||', $data);
 
-		if ($data[PHPADS_ADELEMENT_ADTYPE]==PHPADS_ADTYPE_OTHER) {
-		    $data = fopen('uploads/'.$_POST['id']."_".$data[ PHPADS_ADELEMENT_NAME ].'.inc.txt', 'w');
-		    flock($data, 2);
-	    	    fputs($data, $_POST['otherinfo']);
-		    flock($data, 3);
-		    fclose($data);
-		}
+		$data[PHPADS_ADELEMENT_OTHERCONTENT] = str_replace("\n","", $_POST['otherinfo']);
+		$ads[$i] = join('||', $data);
 
                 break;
             }
         }
         writeads();
-        menu();
+        view();
     } else if (isset($_POST['delete'])) {
         if (!isset($_POST['confirm_delete']) || $_POST['confirm_delete'] != 1) {
             die('You did not confirm the delete. <a href="javascript:window.history.go(-1);">[Back]</a>');
@@ -326,13 +319,6 @@ function edit()
         if (!isset($data)) {
             die('Ad ID ' .$_GET['id']. ' was not found');
         }
-
-
-	if ($data[PHPADS_ADELEMENT_ADTYPE]==PHPADS_ADTYPE_OTHER) {
-	    $data[ PHPADS_ADELEMENT_OTHERCONTENT ] = str_replace("\n","",implode("",file('uploads/'.$data[PHPADS_ADELEMENT_ID]."_".$data[PHPADS_ADELEMENT_NAME].'.inc.txt')));
-	} else {
-	   $data[ PHPADS_ADELEMENT_OTHERCONTENT ] = '';
-	}
 
         head('Edit Ad');
 
