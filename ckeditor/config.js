@@ -35,4 +35,10 @@ CKEDITOR.editorConfig = function( config ) {
 
 	// Simplify the dialog windows.
 	config.removeDialogTabs = 'image:advanced;link:advanced';
+
+	// Allow the edits of iFrame code
+	config.allowedContent = true;
+
+	// Stop it wrapping paragraph tags around everything
+	config.enterMode = CKEDITOR.ENTER_DIV;
 };
