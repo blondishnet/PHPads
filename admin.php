@@ -328,6 +328,12 @@ function edit()
         }
 
 
+	if ($data[PHPADS_ADELEMENT_ADTYPE]==PHPADS_ADTYPE_OTHER) {
+	    $data[ PHPADS_ADELEMENT_OTHERCONTENT ] = str_replace("\n","",implode("",file('uploads/'.$data[PHPADS_ADELEMENT_ID]."_".$data[PHPADS_ADELEMENT_NAME].'.inc.txt')));
+	} else {
+	   $data[ PHPADS_ADELEMENT_OTHERCONTENT ] = '';
+	}
+
         head('Edit Ad');
 
 	adform($data, 'edit');
