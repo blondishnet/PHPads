@@ -359,13 +359,7 @@ function add()
         $data[ PHPADS_ADELEMENT_NAME ] = stripslashes($_POST['ad_name']);
 	$data[ PHPADS_ADELEMENT_STARTDATE ] = mktime(0, 0, 0, (int)$_POST['ad_starts_month'], (int)$_POST['ad_starts_day'], (int)$_POST['ad_starts_year']);
         $data[ PHPADS_ADELEMENT_ADTYPE ] = (int)$_POST['ad_type'];
-        if ($data[PHPADS_ADELEMENT_ADTYPE]==PHPADS_ADTYPE_OTHER) {
-            $data2 = fopen('uploads/'.$data[PHPADS_ADELEMENT_ID]."_".$data[ PHPADS_ADELEMENT_NAME ].'.inc.txt', 'w');
-            flock($data2, 2);
-            fputs($data2, $_POST['otherinfo']);
-            flock($data2, 3);
-            fclose($data2);
-        }
+	$data[PHPADS_ADELEMENT_OTHERCONTENT] = str_replace("\n","", $_POST['otherinfo']);
 
         $ads[] = join('||', $data);
         writeads();
@@ -386,6 +380,7 @@ function add()
 	$data[ PHPADS_ADELEMENT_NAME ] = "New Ad";
 	$data[ PHPADS_ADELEMENT_WEIGHTING ] = 1;
 	$data[ PHPADS_ADELEMENT_ADTYPE ] = PHPADS_ADTYPE_IMAGE;
+	$data[PHPADS_ADELEMENT_OTHERCONTENT] = '';
 
         head('Add Ad');
 	adform($data, 'add');
