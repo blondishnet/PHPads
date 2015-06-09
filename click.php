@@ -7,7 +7,9 @@ require './ads.inc.php';
 for ($i = 0; $i < count($ads); $i++) {
     if(ereg('^' .$_GET['id']. '\|\|', $ads[$i])) {
         $data = explode('||', $ads[$i]);
-        $data[ PHPADS_ADELEMENT_CLICKTHRUS ]++;
+	if ($_SERVER['REMOTE_ADDR'] != $bannerAds['blockip']) {
+            $data[ PHPADS_ADELEMENT_CLICKTHRUS ]++;
+	}
         $ads[$i] = join('||', $data);
         break;
     }
