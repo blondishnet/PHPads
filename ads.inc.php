@@ -39,14 +39,15 @@ function writeads()
 {
     global $bannerAdsPath, $ads, $bannerAds;
     $data = fopen($bannerAdsPath, 'w') or die();
-    flock($data, 2) or die();
+    flock($data, LOCK_EX) or die();
     fputs($data, @join("\n", $ads)."\n");
     while (list ($key, $val) = each ($bannerAds)) {
         if ($key != '') {
             fputs($data, $key.'='.$val."\n");
         }
     }
-    flock($data, 3);
+    fflush($data);
+    flock($data, LOCK_UN);
     fclose($data);
     reset($bannerAds);
 }
