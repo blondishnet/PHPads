@@ -5,7 +5,7 @@ require './ads.inc.php';
 // Don't Edit Anything Below This Line!
 ///////////////////////////////////////
 for ($i = 0; $i < count($ads); $i++) {
-    if(ereg('^' .$_GET['id']. '\|\|', $ads[$i])) {
+    if(preg_match('/^' .$_GET['id']. '\|\|/', $ads[$i])) {
         $data = explode('||', $ads[$i]);
 	if ($_SERVER['REMOTE_ADDR'] != $bannerAds['blockip']) {
             $data[ PHPADS_ADELEMENT_CLICKTHRUS ]++;

@@ -260,7 +260,7 @@ function edit()
     }
     if (isset($_POST['save'])) {
         for ($i = 0; $i < count($ads); $i++) {
-            if(ereg('^' .$_POST['id']. '\|\|', $ads[$i])) {
+            if(preg_match('/^' .$_POST['id']. '\|\|/', $ads[$i])) {
                 $data = explode('||', $ads[$i]);
                 if (isset($_POST['ad_en']) && $_POST['ad_en'] == 1) {
                     $data[ PHPADS_ADELEMENT_ENABLED ] = 1;
@@ -300,7 +300,7 @@ function edit()
         }
 	$nads = array();
         foreach ($ads as $ad) {
-            if(!ereg('^' .$_POST['id']. '\|\|', $ad)) {
+            if(!preg_match('/^' .$_POST['id']. '\|\|/', $ad)) {
                 $nads[] = $ad;
             }
         }
@@ -311,7 +311,7 @@ function edit()
         menu();
     } else {
         foreach ($ads as $ad) {
-            if(ereg('^' .$_GET['id']. '\|\|', $ad)) {
+            if(preg_match('/^' .$_GET['id']. '\|\|/', $ad)) {
                 $data = explode('||', $ad);
                 break;
             }

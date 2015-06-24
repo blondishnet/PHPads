@@ -25,8 +25,8 @@ define( 'PHPADS_ADTYPE_OTHER',           1);
 
 foreach ($lines as $line) {
     $line = chop($line);
-    if (($line != '') && (!ereg('^#', $line))) {
-        if (ereg('^[A-Za-z0-9 ]+\|\|', $line)) {
+    if (($line != '') && (!preg_match('/^#/', $line))) {
+        if (preg_match('/^[A-Za-z0-9 ]+\|\|/', $line)) {
             $ads[] = $line;
         } else {
             list ($key, $val) = explode('=', $line);

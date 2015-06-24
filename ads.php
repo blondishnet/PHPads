@@ -12,7 +12,7 @@ class bannerAds
         global $ads, $bannerAds, $bannerAdsTime;
         if ($id != null) {
             for ($i = 0; $i < count($ads); $i++) {
-                if(ereg("^$id\|\|", $ads[$i])) {
+                if(preg_match("/^$id\|\|/", $ads[$i])) {
                     $data = explode('||', $ads[$i]);
 		    // Only return if we've still got some impressions left and we're within time
 		    if (($data[ PHPADS_ADELEMENT_REMAINING ] > 0 || $data[ PHPADS_ADELEMENT_REMAINING ] == -1) && ($data[ PHPADS_ADELEMENT_ENDDATE ] > $bannerAdsTime && $data[ PHPADS_ADELEMENT_STARTDATE ] < $bannerAdsTime) && $data[ PHPADS_ADELEMENT_ENABLED ]) {
