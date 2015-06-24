@@ -308,7 +308,7 @@ function edit()
         writeads();
         menu();
     } else if (isset($_POST['cancel'])) {
-        menu();
+        view();
     } else {
         foreach ($ads as $ad) {
             if(preg_match('/^' .$_GET['id']. '\|\|/', $ad)) {
@@ -365,7 +365,7 @@ function add()
         writeads();
         menu();
     } else if (isset($_POST['cancel'])) {
-        menu();
+        view();
     } else {
 
 	$data = array( null, null, null, null, null, null, null, null, null, null, null, null, null, null );
