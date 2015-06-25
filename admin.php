@@ -93,9 +93,9 @@ function adform($data, $mode) {
         }
         $starts = dateselect('ad_starts', $data[ PHPADS_ADELEMENT_STARTDATE ]);
 
-        echo '<script src="ckeditor/ckeditor.js"></script>';
+        //echo '<script src="ckeditor/ckeditor.js"></script>';
         echo 'You can edit any of the following properties for Ad ' .$data[PHPADS_ADELEMENT_ID]. ':';
-	echo '<form method="post" action="admin.php">';
+	echo '<form method="post" action="admin.php" enctype="multipart/form-data">';
 	echo '<input type="hidden" name="action" value="'.$mode.'" />';
 	echo '<table width="550" border="1" cellspacing="0" cellpadding="1">';
 	if ($mode=='edit') {
@@ -108,7 +108,9 @@ function adform($data, $mode) {
         echo '<tr><th>Ad Type:</th><td><select name="ad_type" id="ad_type"><option value="'.PHPADS_ADTYPE_IMAGE.'"'.($data[PHPADS_ADELEMENT_ADTYPE]==PHPADS_ADTYPE_IMAGE?' selected="selected"':'').'>Image</option><option value="'.PHPADS_ADTYPE_OTHER.'"'.($data[PHPADS_ADELEMENT_ADTYPE]==PHPADS_ADTYPE_OTHER?' selected="selected"':'').'>Other</option></select></td><tr>';
         echo '<tr class="otherrow"><th>Other ad format:</th><td><textarea class="ckeditor" name="otherinfo" wrap="virtual" cols="50" rows="10">' .$data[ PHPADS_ADELEMENT_OTHERCONTENT ]. '</textarea></td></tr>';
         echo '<tr class="imagerow"><td><b>Link URL:</b></td><td><input type="text" name="ad_link" value="' .$data[ PHPADS_ADELEMENT_LINK_URI ]. '" size="30" /></td></tr>';
-        echo '<tr class="imagerow"><td><b>Image URL:</b></td><td><input type="text" name="ad_image" value="' .$data[ PHPADS_ADELEMENT_IMAGE_URI ]. '" size="30" /></td></tr>';
+        echo '<tr class="imagerow"><td><b>Image URL:</b></td><td><input type="text" name="ad_image" id="ad_image" value="' .$data[ PHPADS_ADELEMENT_IMAGE_URI ]. '" size="30" /><br />';
+	echo 'Upload image to use (doesn\'t work in IE <10): <input type="file" name="upload" id="fileToUpload" accept="image/*" />';
+	echo '<div id="progressbar"></div></td></tr>';
         echo '<tr><td><b>Image Width:</b></td><td><input type="text" name="ad_width" value="' .$data[ PHPADS_ADELEMENT_WIDTH ]. '" size="4" /></td></tr>';
         echo '<tr><td><b>Image Height:</b></td><td><input type="text" name="ad_height" value="' .$data[ PHPADS_ADELEMENT_HEIGHT ]. '" size="4" /></td></tr>';
 	echo '<tr><td><b>Weight:</b></td><td><input type="text" name="ad_weight" value="' .$data[ PHPADS_ADELEMENT_WEIGHTING ]. '" size="4" /></td></tr>';
@@ -128,19 +130,55 @@ function adform($data, $mode) {
 		echo '<a href="' .$data[ PHPADS_ADELEMENT_LINK_URI ]. '" target="_blank"><img src="' .$data[ PHPADS_ADELEMENT_IMAGE_URI ]. '" alt="' .$data[ PHPADS_ADELEMENT_NAME ]. '" width="' .$data[ PHPADS_ADELEMENT_WIDTH ]. '" height="' .$data[ PHPADS_ADELEMENT_HEIGHT ]. '" border="0" /></a>';
 	    }
 	}
-	echo '</div></form>';
-        echo '<script>$(".' .($data[PHPADS_ADELEMENT_ADTYPE]==PHPADS_ADTYPE_OTHER?'image':'other'). 'row").hide();$("#ad_type").change(function(){ $("."+($(this).val()=='.PHPADS_ADTYPE_OTHER.'?"image":"other")+"row").hide();$("."+($(this).val()=='.PHPADS_ADTYPE_OTHER.'?"other":"image")+"row").show(); }); CKEDITOR.instances.editor1.setData( "' .str_replace('"', '\\"', $data[ PHPADS_ADELEMENT_OTHERCONTENT ]). '" );</script>';
+	echo '</div>i<div id="dialog"></div></form>'."\n";
+        echo '<script>';
+	echo '  $(function(){ $("#progressbar").progressbar({ value: 0 }); });';
+        echo '  document.getElementById("fileToUpload").addEventListener("change", function(e) {';
+        echo '      var file = this.files[0];';
+	echo '      var fd = new FormData();';
+	echo '      fd.append("fileToUpload", file);';
+	echo '      fd.append("submit","submit");';
+        echo '      var xhr = new XMLHttpRequest();';
+        echo '      xhr.file = file; // not necessary if you create scopes like this';
+        echo '      xhr.addEventListener("progress", function(e) {';
+        echo '          var done = e.position || e.loaded, total = e.total || e.total;';
+	echo '          $("#progressbar").progressbar({ value: (Math.floor(done/total*1000)/10) });';
+        echo '      }, false);';
+        echo '      if ( xhr.upload ) {';        
+        echo '          xhr.upload.onprogress = function(e) {';
+        echo '              var done = e.position || e.loaded, total = e.total || e.total;';
+	echo '              $("#progressbar").progressbar({ value: (Math.floor(done/total*1000)/10) });';
+        echo '          };';
+        echo '      }'."\n";
+        echo '      xhr.onreadystatechange = function(e) {';
+        echo '          if ( 4 == this.readyState ) {';
+	echo '              var parsed = $.parseHTML(this.responseText);';
+	echo '              var message = $(parsed).find(".errormessage").html();';
+	echo '              var uploadurl = $(parsed).find("#uploadurl").html();';
+	echo '              $("#progressbar").progressbar({ value: 100 });';
+	echo '              if( uploadurl ){ $("#ad_image").val(uploadurl); $("#progressbar").hide(); $("#fileToUpload").hide(); }';
+	echo '              else { $("#dialog").dialog({ modal: true, title: "Error uploading file" }).html(message).parent().addClass("ui-state-error"); }';
+        echo '          }';
+        echo '      };';
+        echo '      xhr.open("POST", "admin.php?action=fileupload", true);';
+	echo '      xhr.send(fd);';
+        echo '  }, false);';
+	//echo '  });';
+        echo '</script>'."\n";
+	echo '<script src="ckeditor/ckeditor.js"></script>'."\n";
+	echo '<script>$(".' .($data[PHPADS_ADELEMENT_ADTYPE]==PHPADS_ADTYPE_OTHER?'image':'other'). 'row").hide();$("#ad_type").change(function(){ $("."+($(this).val()=='.PHPADS_ADTYPE_OTHER.'?"image":"other")+"row").hide();$("."+($(this).val()=='.PHPADS_ADTYPE_OTHER.'?"other":"image")+"row").show(); }); CKEDITOR.instances.editor1.setData( "' .str_replace('"', '\\"', $data[ PHPADS_ADELEMENT_OTHERCONTENT ]). '" );</script>';
+	
 }
 function head($title)
 {
-    echo '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" /><title>PHPads - admin - ' .$title. '</title><link href="jquery-ui-1.11.4.custom/jquery-ui.css" rel="stylesheet"><style type="text/css">body, td{font-family:arial;font-size:10px;color:#000000;background-color:#D8E7D3;}b{font-weight:bold;}h1{font-size:12px;}.smalltext{font-size:10px;}.error{color:#ff0000;}</style><script src="jquery-ui-1.11.4.custom/external/jquery/jquery.js"></script><script src="jquery-ui-1.11.4.custom/jquery-ui.js"></script></head><body><div align="center"><img src="phpads-main.png" alt="PHPads">
+    echo '<!DOCTYPE html><head><title>PHPads - admin - ' .$title. '</title><link href="jquery-ui-1.11.4.custom/jquery-ui.css" rel="stylesheet"><style type="text/css">body, td{font-family:arial;font-size:10px;color:#000000;background-color:#D8E7D3;}b{font-weight:bold;}h1{font-size:12px;}.smalltext{font-size:10px;}.error{color:#ff0000;}</style><script src="jquery-ui-1.11.4.custom/external/jquery/jquery.js"></script><script src="jquery-ui-1.11.4.custom/jquery-ui.js"></script></head><body><div align="center"><img src="phpads-main.png" alt="PHPads">
 <br><b>' .$title. '</b></div><br /><br /><table align="center" width="550" border="0" cellspacing="2" cellpadding="2"><tr><td align="left">';
 }
 function foot()
 {
     echo '</td></tr></table><br /><br /><div align="center"><hr width="550"><span class="smalltext"><a href="admin.php?action=config">Configuration</a> | <a href="admin.php?action=list">List Ads</a> | <a href="admin.php?action=add">Add Ad</a> | <a href="admin.php?action=fileupload">File upload</a> | <a href="admin.php?action=codegen">Code Generator</a> | <a href="admin.php?action=logout">Logout</a><p><a href="http://blondish.net/">PHPads</a></span></div>';
     echo '<script>$("input[type=submit]").button();</script>';
-    echo '</body></html>';
+    echo '</body></html>'."\n";
 }
 function auth()
 {
@@ -455,6 +493,9 @@ global $bannerAds;
 function fileupload()
 {
     if (isset($_POST['submit'])) {
+header("Expires: Sun, 20 Jan 1985 00:00:00 GMT"); // date in the past
+header("Cache-Control: no-cache");
+header("Pragma: no-cache"); 
 	head('File upload...');
 	$target_dir = "uploads/";
 	$target_file = $target_dir . basename($_FILES["fileToUpload"]["name"]);
@@ -466,27 +507,27 @@ function fileupload()
 	if($check !== false) {
 	    $uploadOk = 1;
 	} else {
-	    echo "File is not an image.<br />";
+	    echo "<div class='errormessage'>File is not an image.</div><br />";
 	    $uploadOk = 0;
 	}
 	// Check if file already exists
 	if (file_exists($target_file)) {
-	    echo "Sorry, a file already exists with that name.<br />";
+	    echo "<div class='errormessage'>Sorry, a file already exists with that name (".basename($_FILES["fileToUpload"]["name"]).").</div><br />";
 	    $uploadOk = 0;
 	}
 	// Allow certain file formats
 	if($imageFileType != "jpg" && $imageFileType != "png" && $imageFileType != "jpeg" && $imageFileType != "gif" ) {
-	    echo "Sorry, only JPG, JPEG, PNG & GIF files are allowed.<br />";
+	    echo "<div class='errormessage'>Sorry, only JPG, JPEG, PNG & GIF files are allowed.</div><br />";
 	    $uploadOk = 0;
 	}
 	if (!$uploadOk) {
-	    echo "Your file was not uploaded.";
+	    echo "<div class='errormessage'>Your file was not uploaded.</div>";
 	// if everything is ok, try to upload file
 	} else {
 	    if (move_uploaded_file($_FILES["fileToUpload"]["tmp_name"], $target_file)) {
-	        echo "<strong>The file ". basename( $_FILES["fileToUpload"]["name"]). " has been uploaded.</strong><br /><br />The URL for this image is:<br />http://".$_SERVER['SERVER_NAME']."/uploads/". basename( $_FILES["fileToUpload"]["name"]);
+	        echo "<strong>The file ". basename( $_FILES["fileToUpload"]["name"]). " has been uploaded.</strong><br /><br />The URL for this image is:<br /><div id='uploadurl'>http://".$_SERVER['SERVER_NAME']."/uploads/". basename( $_FILES["fileToUpload"]["name"])."</div>";
 	    } else {
-	        echo "Sorry, there was an error uploading your file.";
+	        echo "<div class='errormessage'>Sorry, there was an error uploading your file.</div>";
 	    }
 	}
 	foot();
