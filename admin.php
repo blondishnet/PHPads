@@ -130,7 +130,7 @@ function adform($data, $mode) {
 		echo '<a href="' .$data[ PHPADS_ADELEMENT_LINK_URI ]. '" target="_blank"><img src="' .$data[ PHPADS_ADELEMENT_IMAGE_URI ]. '" alt="' .$data[ PHPADS_ADELEMENT_NAME ]. '" width="' .$data[ PHPADS_ADELEMENT_WIDTH ]. '" height="' .$data[ PHPADS_ADELEMENT_HEIGHT ]. '" border="0" /></a>';
 	    }
 	}
-	echo '</div>i<div id="dialog"></div></form>'."\n";
+	echo '</div><div id="dialog"></div></form>'."\n";
         echo '<script>';
 	echo '  $(function(){ $("#progressbar").progressbar({ value: 0 }); });';
         echo '  document.getElementById("fileToUpload").addEventListener("change", function(e) {';
